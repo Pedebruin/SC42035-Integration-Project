@@ -55,12 +55,14 @@ for i = 1:399
     led(brightness);
     
     % plot heater and temperature data
-    h1s = [h1s,ht1];
+    h1s = [h1s,ht1];        % Write input to vector
     h2s = [h2s,ht2];
-    t1s = [t1s,t1];
+    t1s = [t1s,t1];         % Write output to vector
     t2s = [t2s,t2];
     n = length(t1s);
     time = linspace(0,n+1,n);
+    
+    
     clf
     subplot(2,1,1)
     plot(time,t1s,'r.','MarkerSize',10);
