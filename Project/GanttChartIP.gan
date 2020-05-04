@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Integration Project" company="" webLink="http://" view-date="2020-04-20" view-index="0" gantt-divider-location="302" resource-divider-location="300" version="2.8.11" locale="en_GB">
+    <description/>
+    <view zooming-state="default:5" id="gantt-chart">
+        <field id="tpd3" name="Name" width="168" order="0"/>
+        <field id="tpd4" name="Begin date" width="65" order="1"/>
+        <field id="tpd5" name="End date" width="65" order="2"/>
+        <option id="color.recent"><![CDATA[#00cccc #cc0000 #cc00cc #99ff00 #ff0033]]></option>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Name" width="210" order="0"/>
+        <field id="1" name="Default role" width="86" order="1"/>
+    </view>
+    <!-- -->
+    <calendars base-id="NL">
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="false"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+        <date year="2020" month="6" date="22" type="WORKING_DAY" color="#cc00cc"><![CDATA[Start of Exams]]></date>
+        <date year="2020" month="4" date="20" type="WORKING_DAY" color="#00cccc"><![CDATA[Start of Period]]></date>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="35" name="Introduction" color="#000000" meeting="false" start="2020-04-22" duration="10" complete="0" thirdDate="2020-04-13" thirdDate-constraint="0" expand="true">
+            <task id="60" name="Pickup Lab Device" color="#00cccc" meeting="true" start="2020-04-22" duration="0" complete="0" thirdDate="2020-04-13" thirdDate-constraint="0" expand="true"/>
+            <task id="37" name="Familiarisation &amp; First tests" color="#8cb6ce" meeting="false" start="2020-04-22" duration="8" complete="0" thirdDate="2020-04-15" thirdDate-constraint="0" expand="true"/>
+            <task id="36" name="Project planning" color="#8cb6ce" meeting="false" start="2020-04-28" duration="6" complete="0" thirdDate="2020-04-13" thirdDate-constraint="0" expand="true"/>
+        </task>
+        <task id="42" name="1st Discussion" color="#cc0000" meeting="true" start="2020-05-05" duration="0" complete="0" thirdDate="2020-04-13" thirdDate-constraint="0" expand="true"/>
+        <task id="22" name="System Identification" color="#8cb6ce" meeting="false" start="2020-05-01" duration="8" complete="0" thirdDate="2020-05-04" thirdDate-constraint="0" expand="true">
+            <task id="24" name="BB: First order delay model" color="#8cb6ce" meeting="false" start="2020-05-01" duration="6" complete="0" thirdDate="2020-05-04" thirdDate-constraint="0" expand="true"/>
+            <task id="25" name="BB: Subspace Identification" color="#8cb6ce" meeting="false" start="2020-05-01" duration="6" complete="0" thirdDate="2020-05-04" thirdDate-constraint="0" expand="true"/>
+            <task id="28" name="GB: 1st principles" meeting="false" start="2020-05-05" duration="6" complete="0" expand="true"/>
+        </task>
+        <task id="0" name="Experiments" color="#000000" meeting="false" start="2020-05-12" duration="6" complete="0" thirdDate="2020-05-11" thirdDate-constraint="0" expand="true">
+            <task id="1" name="Set up &amp; Run Experiments" color="#8cb6ce" meeting="false" start="2020-05-12" duration="4" complete="0" thirdDate="2020-05-11" thirdDate-constraint="0" expand="true"/>
+            <task id="16" name="Data Validation" color="#8cb6ce" meeting="false" start="2020-05-12" duration="4" complete="0" thirdDate="2020-05-08" thirdDate-constraint="0" expand="true"/>
+            <task id="69" name="Model Validation" meeting="false" start="2020-05-15" duration="3" complete="0" expand="true"/>
+        </task>
+        <task id="43" name="2nd Discussion" color="#cc0000" meeting="true" start="2020-05-19" duration="0" complete="0" thirdDate="2020-04-13" thirdDate-constraint="0" expand="true"/>
+        <task id="29" name="Controller Design" meeting="false" start="2020-05-26" duration="9" complete="0" expand="true">
+            <task id="30" name="MPC" meeting="false" start="2020-05-26" duration="6" complete="0" expand="true"/>
+            <task id="31" name="PID" meeting="false" start="2020-05-26" duration="6" complete="0" expand="true"/>
+            <task id="70" name="Bang-Bang" color="#8cb6ce" shape="1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1" meeting="false" start="2020-06-02" duration="1" complete="0" thirdDate="2020-06-02" thirdDate-constraint="0" expand="true"/>
+            <task id="33" name="Controller Validation" meeting="false" start="2020-06-02" duration="4" complete="0" expand="true"/>
+        </task>
+        <task id="65" name="Report Finalisation" meeting="false" start="2020-06-09" duration="6" complete="0" expand="true"/>
+        <task id="53" name="Report Deadline" color="#cc0000" meeting="true" start="2020-06-17" duration="0" complete="0" thirdDate="2020-04-06" thirdDate-constraint="0" expand="true">
+            <notes><![CDATA[Before 16:00!]]></notes>
+        </task>
+        <task id="52" name="Final Discussion" color="#cc0000" meeting="true" start="2020-06-23" duration="0" complete="0" thirdDate="2020-04-06" thirdDate-constraint="0" expand="true"/>
+    </tasks>
+    <resources>
+        <resource id="0" name="Marco Delgado Schwartz" function="Default:0" contacts="" phone=""/>
+        <resource id="1" name="Pim de Bruin" function="Default:0" contacts="" phone=""/>
+    </resources>
+    <allocations/>
+    <vacations/>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
