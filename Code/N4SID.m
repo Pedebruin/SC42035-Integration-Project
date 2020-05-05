@@ -1,7 +1,7 @@
-clear; close all
+function [ss1,x0] = N4SID(data, settings)
 %{ 
 This file fits a nth order model to a dataset using the N4SID subspace
-identification method. 
+identification method and levenberg marquand optimisation.  
 
 Written by:
     Pim de Bruin 
@@ -9,63 +9,46 @@ Written by:
 
 For the course:
     SC42035 Integration Project Systems and Control (2019/20 Q4)
-%}
+---------------------------------------------------------------------------
+Inputs:
+    data --> iddata object with identification experiment
+    settings --> Struct with some quick access settings
+        settings.nx : Initial guess for model order 
+        settings.system :   Siso 1  Identify siso model on heater 1
+                            Siso 2  Identify siso model on heater 2
+                            Mimo    Identify Mimo model on system
+%}                          
+
 
 %% Settings
-Nx = 4;
+opt = ssestOptions( 'InitializeMethod','n4sid',...
+                    'Focus','Simulation',...
+                    'N4Weight','MOESP',...
+                    'InitialState','estimate',...
+                    'Display','on');
+nx = settings.nx;
+Ts = settings.Ts;
 
 
 %% Main code
-disp('Select data file')
-[file,path]= uigetfile('*.mat');
-if isequal(file,0)
-    disp('no file selected')
-else
-    disp(['User selected: ', file]);
-    load(fullfile(path,file),'h1s','h2s','t1s','t2s')
-end
+% Append initial zeros and equilibrium 
+Output = data.OutputData;
+Prefix = iddata([ones(nx,1)*Output(1,1), ones(nx,1)*Output(1,2)],...
+                zeros(nx,2),Ts,...
+              'OutputName', {'Temperature 1'; 'Temperature 2'},...
+              'OutputUnit', {'Degree C'; 'Degree C'},...
+              'InputName', {'Heater power 1'; 'Heater power 2'},...
+              'InputUnit', {'%';'%'});          
+data = [Prefix; data];
 
-% Append initial zeros and equilibrium temperature
-h1s = [zeros(1,Nx), h1s];
-h2s = [zeros(1,Nx), h2s];
-t1s = [ones(1,Nx)*t2s(1), t1s];
-t2s = [ones(1,Nx)*t2s(1), t2s];
-
-% Write into iddata structures
-data1 = iddata(t1s', h1s', 1, 'OutputName', 'Temperature 1', 'InputName', 'Heater power 1');
-data2 = iddata(t2s', h2s', 1, 'OutputName', 'Temperature 2', 'InputName', 'Heater power 2');
 
 % Check percistancy of exitation
-Ped1 = pexcit(data1);
-Ped2 = pexcit(data2);
+Ped1 = pexcit(data(:,1,1));
 
-% Run N4SID algorithm. 
-opt= n4sidOptions('Focus','Simulation','N4Weight','MOESP');
-[Tf1,x0] = n4sid(data1,Nx,opt);
-
-
-% Simulate estimated model
-t = 1:length(t1s);
-y = lsim(Tf1,h1s,t,x0);
-
-
-
-
-% Plot
-figure 
-subplot(2,1,1)
-    hold on
-    plot(t,y)
-    plot(t,t1s)
-subplot(2,1,2)
-    hold on
-    plot(t,h1s)
-
-
-
-
-
-
+% Run N4SID and ss estimation algorithm. 
+nk = delayest(data(:,1,1));
+[ss1,x0] = ssest(data(:,1,1),1:Ped1,'InputDelay',nk,opt);
+end
 
 
 
