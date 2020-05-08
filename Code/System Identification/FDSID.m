@@ -1,4 +1,4 @@
-function [sys] = FDSID(data)
+function [sys] = FDSID(idd)
 
     % ---- Initial guess constructed from data: ----
     K = 1/3;
@@ -7,6 +7,7 @@ function [sys] = FDSID(data)
     init_sys = tf(K,[tau 1],'InputDelay',d);
     
     % ---- Refinement: ----
+    data = idd(:,1,1);
     sys = tfest(data,init_sys);
 
 end
