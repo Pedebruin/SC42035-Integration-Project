@@ -13,7 +13,7 @@ For the course:
 %% ==== SETUP: ====
 
 % ---- Accessing functions from folders: ----
-cd 'System Identification';
+cd 'System_Identification';
 N4SID = @N4SID;
 FDSID = @FDSID;
 cd ../
@@ -22,9 +22,9 @@ cd ../
           
 % ---- Load identifiation data: ----
 disp('Select data file')
-[file,path]= uigetfile('*.mat');
+[file,path]= uigetfile('Experiments/*.mat');
 if isequal(file,0)
-    disp('no file selected')
+    error('No identification file has been selected')
 else
     disp(['User selected: ', file]);
     load(fullfile(path,file),'h1s','h2s','t1s','t2s')
@@ -38,12 +38,11 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
               'InputName', {'Heater power 1'; 'Heater power 2'},...
               'InputUnit', {'%';'%'});
           
-
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 0;
-makeFDSID = 1;
+makeN4SID = 1;
+makeFDSID = 0;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -52,7 +51,7 @@ ydata = [];
 if makeN4SID
     % ---- N4SID: ---- 
     n4sid_settings.nx = 6;
-    n4sid_settings.system = 'siso 1';               % Still under construction
+    n4sid_settings.system = 'siso 1';               
     n4sid_settings.Ts = Ts;      
 
     [ss1, x0] = N4SID(idd, n4sid_settings);
@@ -95,8 +94,8 @@ if makefigure
     
     % ---- Plots: ----
     title(ax1,"Output")
-    plot(ax1,tdata,ydata)
-    plot(ax1,tdata,t1s, 'DisplayName', 'Simulation')
+    plot(ax1,tdata,ydata, 'DisplayName', 'Simulation')
+    plot(ax1,tdata,t1s, 'DisplayName', 'Data')
     ylim(ax1,[0 inf])
     xlabel(ax1,"Time in [s]")
     ylabel(ax1,"Sensors tempererature in [ºC]")
