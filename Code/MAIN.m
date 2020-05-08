@@ -17,9 +17,9 @@ For the course:
 %% Identification
 % Load identifiation data
 disp('Select data file')
-[file,path]= uigetfile('*.mat');
+[file,path]= uigetfile('Experiments/*.mat');
 if isequal(file,0)
-    disp('no file selected')
+    error('No identification file has been selected')
 else
     disp(['User selected: ', file]);
     load(fullfile(path,file),'h1s','h2s','t1s','t2s')
