@@ -51,7 +51,7 @@ ydata = [];
 if makeN4SID
     % ---- N4SID: ---- 
     n4sid_settings.nx = 6;
-    n4sid_settings.system = 'siso 1';               % Still under construction
+    n4sid_settings.system = 'siso 1';               
     n4sid_settings.Ts = Ts;      
 
     [ss1, x0] = N4SID(idd, n4sid_settings);
