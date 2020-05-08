@@ -15,7 +15,7 @@ For the course:
 % ---- Accessing functions from folders: ----
 cd 'System Identification';
 N4SID = @N4SID;
-%FDSID = @FDSID;
+FDSID = @FDSID;
 cd ../
 
 %% ==== EXPERIMENT DATA MANAGEMENT: ====
@@ -42,8 +42,8 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 1;
-makeFDSID = 0;
+makeN4SID = 0;
+makeFDSID = 1;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -59,21 +59,41 @@ if makeN4SID
 
     % Simulate estimated model with identification data: 
     y = lsim(ss1,h1s,tdata,x0);
-    ydata = [ydata;y];
+    ydata = [ydata;y'];
+
+elseif makeFDSID
+    % ---- FDSID: ----
+    [sys] = FDSID(idd);
+    % Simulate estimated model with identification data: 
+    y = lsim(sys,h1s,tdata);
+    ydata = [ydata;y'];
 end
 
 %% ==== PLOT: ====
 
+% ---- Switches: ----
 makefigure = 1;
 
 if makefigure
-    figure(1) 
-    subplot(2,1,1)
-        hold on
-        plot(tdata,ydata)
-        plot(tdata,t1s)
-    subplot(2,1,2)
-        hold on
-        plot(tdata,h1s)
+    % ---- Figure setup: ----
+    fig = figure(1); 
+    ax1 = subplot(2,1,1);
+    ax2 = subplot(2,1,2);
+    hold(ax1, "on");
+    hold(ax2, "on");
+    
+    % ---- Plots: ----
+    title(ax1,"Output")
+    plot(ax1,tdata,ydata)
+    plot(ax1,tdata,t1s)
+    xlabel(ax1,"Time in [s]")
+    ylabel(ax1,"Sensors tempererature in [ºC]")
+    
+    title(ax2,"Input")
+    plot(ax2,tdata,h1s)
+    ylim(ax2,[0 100])
+    xlabel(ax2,"Time in [s]")
+    ylabel(ax2,"Input heaters in [%]")
 end
 
+disp('Done.')

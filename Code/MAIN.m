@@ -62,25 +62,46 @@ if makeN4SID
     ydata = [ydata;y'];
 
 elseif makeFDSID
-    % ---- FDSID: ----
-    [sys] = FDSID(idd);
+    % ---- Initial guess constructed from data: ----
+    K = 1/3;
+    d = 15;
+    tau = 47;
+    init_sys = tf(K,[tau 1],'InputDelay',d);
     
+    % ---- FDSID: ----
+    [sys] = FDSID(init_sys, idd);
+    % Simulate estimated model with identification data: 
+    y = lsim(init_sys,h1s,tdata);
+    ydata = [ydata;y'];
 end
 
 %% ==== PLOT: ====
 
 % ---- Switches: ----
-makefigure = 0;
+makefigure = 1;
 
 if makefigure
-    figure(1) 
-    subplot(2,1,1)
-        hold on
-        plot(tdata,ydata)
-        plot(tdata,t1s)
-    subplot(2,1,2)
-        hold on
-        plot(tdata,h1s)
+    % ---- Figure setup: ----
+    fig = figure(1); 
+    ax1 = subplot(2,1,1);
+    ax2 = subplot(2,1,2);
+    hold(ax1, "on");
+    hold(ax2, "on");
+    
+    % ---- Plots: ----
+    title(ax1,"Output")
+    plot(ax1,tdata,ydata, 'DisplayName', 'Data')
+    plot(ax1,tdata,t1s, 'DisplayName', 'Simulation')
+    xlabel(ax1,"Time in [s]")
+    ylabel(ax1,"Sensors tempererature in [ºC]")
+    legend(ax1)
+    
+    title(ax2,"Input")
+    plot(ax2,tdata,h1s, 'DisplayName', 'Heater 1')
+    ylim(ax2,[0 100])
+    xlabel(ax2,"Time in [s]")
+    ylabel(ax2,"Input heaters in [%]")
+    legend(ax2)
 end
 
 disp('Done.')
