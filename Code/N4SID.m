@@ -1,4 +1,4 @@
-function [ss1,x0] = N4SID(data, settings)
+function [ss,x0] = N4SID(data, settings)
 %{ 
 This file fits a nth order model to a dataset using the N4SID subspace
 identification method and levenberg marquand optimisation.  
@@ -29,8 +29,6 @@ opt = ssestOptions( 'InitializeMethod','n4sid',...
 nx = settings.nx;
 Ts = settings.Ts;
 
-
-%% Main code
 % Append initial zeros and equilibrium 
 Output = data.OutputData;
 Prefix = iddata([ones(nx,1)*Output(1,1), ones(nx,1)*Output(1,2)],...
@@ -41,13 +39,33 @@ Prefix = iddata([ones(nx,1)*Output(1,1), ones(nx,1)*Output(1,2)],...
               'InputUnit', {'%';'%'});          
 data = [Prefix; data];
 
+%% Main code
+switch settings.system(end)
+    case "1"
+        % Check percistancy of exitation
+        Ped1 = pexcit(data(:,1,1));
 
-% Check percistancy of exitation
-Ped1 = pexcit(data(:,1,1));
+        % Run N4SID and ss estimation algorithm. 
+        nk = delayest(data(:,1,1));
+        [ss,x0] = ssest(data(:,1,1),1:max(1,Ped1),'InputDelay',nk,opt);
 
-% Run N4SID and ss estimation algorithm. 
-nk = delayest(data(:,1,1));
-[ss1,x0] = ssest(data(:,1,1),1:Ped1,'InputDelay',nk,opt);
+    case "2"
+        % Check percistancy of exitation
+        Ped2 = pexcit(data(:,2,2));
+
+        % Run N4SID and ss estimation algorithm. 
+        nk = delayest(data(:,2,2));
+        [ss,x0] = ssest(data(:,2,2),1:max(1,Ped2),'InputDelay',nk,opt);
+    case "o" 
+        Ped3 = min(pexcit(data));
+        
+        % Run N4SID and ss estimation algorithm. 
+        nk1 = delayest(data(:,1,1));
+        nk2 = delayest(data(:,2,2));
+       
+        [ss,x0] = ssest(data,1:max(1,Ped3),'InputDelay',[nk1 nk2],opt);      
+ 
+end
 end
 
 
