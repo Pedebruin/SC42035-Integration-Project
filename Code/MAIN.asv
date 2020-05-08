@@ -13,7 +13,7 @@ For the course:
 %% ==== SETUP: ====
 
 % ---- Accessing functions from folders: ----
-cd 'System_Identification';
+cd 'System Identification';
 N4SID = @N4SID;
 FDSID = @FDSID;
 cd ../
@@ -22,9 +22,9 @@ cd ../
           
 % ---- Load identifiation data: ----
 disp('Select data file')
-[file,path]= uigetfile('Experiments/*.mat');
+[file,path]= uigetfile('*.mat');
 if isequal(file,0)
-    error('No identification file has been selected')
+    disp('no file selected')
 else
     disp(['User selected: ', file]);
     load(fullfile(path,file),'h1s','h2s','t1s','t2s')
@@ -38,11 +38,12 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
               'InputName', {'Heater power 1'; 'Heater power 2'},...
               'InputUnit', {'%';'%'});
           
+
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 1;
-makeFDSID = 0;
+makeN4SID = 0;
+makeFDSID = 1;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -61,16 +62,10 @@ if makeN4SID
     ydata = [ydata;y'];
 
 elseif makeFDSID
-    % ---- Initial guess constructed from data: ----
-    K = 1/3;
-    d = 15;
-    tau = 47;
-    init_sys = tf(K,[tau 1],'InputDelay',d);
-    
     % ---- FDSID: ----
-    [sys] = FDSID(init_sys, idd);
+    [sys] = FDSID(idd);
     % Simulate estimated model with identification data: 
-    y = lsim(init_sys,h1s,tdata);
+    y = lsim(sys,h1s,tdata);
     ydata = [ydata;y'];
 end
 
@@ -89,18 +84,16 @@ if makefigure
     
     % ---- Plots: ----
     title(ax1,"Output")
-    plot(ax1,tdata,ydata, 'DisplayName', 'Simulation')
-    plot(ax1,tdata,t1s, 'DisplayName', 'Data')
+    plot(ax1,tdata,ydata)
+    plot(ax1,tdata,t1s)
     xlabel(ax1,"Time in [s]")
     ylabel(ax1,"Sensors tempererature in [ºC]")
-    legend(ax1)
     
     title(ax2,"Input")
-    plot(ax2,tdata,h1s, 'DisplayName', 'Heater 1')
+    plot(ax2,tdata,h1s)
     ylim(ax2,[0 100])
     xlabel(ax2,"Time in [s]")
     ylabel(ax2,"Input heaters in [%]")
-    legend(ax2)
 end
 
 disp('Done.')
