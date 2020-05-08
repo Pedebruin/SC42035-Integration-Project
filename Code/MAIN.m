@@ -63,16 +63,21 @@ if makeN4SID
 
 elseif makeFDSID
     % ---- Initial guess constructed from data: ----
+    % Values found:
     K = 1/3;
     d = 15;
     tau = 47;
-    init_sys = tf(K,[tau 1],'InputDelay',d);
+    init_tf = tf(K,[tau 1],'InputDelay',d);
+    % Simulate with rough estimate:
+    RoomTemp = idd.OutputData(1,1); %need to add room temperature offset.
+    y = lsim(init_tf,h1s,tdata); 
+    ydata = [ydata; y' + RoomTemp];
     
-    % ---- FDSID: ----
-    [sys] = FDSID(init_sys, idd);
+    % ---- Refining with FDSID: ----
+    [sys] = FDSID(init_tf, idd);
     % Simulate estimated model with identification data: 
-    y = lsim(init_sys,h1s,tdata);
-    ydata = [ydata;y'];
+    y = lsim(sys,h1s,tdata);
+    ydata = [ydata; y' + RoomTemp];
 end
 
 %% ==== PLOT: ====
@@ -90,11 +95,12 @@ if makefigure
     
     % ---- Plots: ----
     title(ax1,"Output")
-    plot(ax1,tdata,ydata, 'DisplayName', 'Data')
+    plot(ax1,tdata,ydata)
     plot(ax1,tdata,t1s, 'DisplayName', 'Simulation')
+    ylim(ax1,[0 inf])
     xlabel(ax1,"Time in [s]")
     ylabel(ax1,"Sensors tempererature in [ºC]")
-    legend(ax1)
+    legend(ax1, 'Location', 'east')
     
     title(ax2,"Input")
     plot(ax2,tdata,h1s, 'DisplayName', 'Heater 1')
