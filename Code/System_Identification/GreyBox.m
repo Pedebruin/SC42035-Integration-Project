@@ -14,7 +14,7 @@ T0 = 20; % Initial guess
 file_name = 'odeFun';   % File describing the model structure.
 Order = [1 1 1];        % Model orders [ny nu nx].
 InitialState = T0;      % Initial initial state (initial temperature)
-Ts =0;                  % Continuous time system
+Ts = 0;                 % Continuous time system
 
 nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
                 'Name', 'Heater 1');
