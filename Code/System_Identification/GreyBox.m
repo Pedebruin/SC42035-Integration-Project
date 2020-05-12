@@ -8,29 +8,7 @@ params: struct containing the to be estimated parameters, their initial
 values and wether they are fixed or not. 
 
 %}
-
-params.U.value          = 5;   % W/(m^2k)
-params.A.value          = 0.0012; % m^2
-params.Ta.value         = 23;     % Celcius
-params.alpha.value      = 0.01;% from % to heat flow
-params.m.value          = 0.004;   % kg
-params.cp.value         = 500;    %J/kg
-params.epsilon.value    = 0.9;
-params.sigma.value      = 5.67e-8;
-params.T_inf.value      = 23;
-
-params.U.fixed          = true;
-params.A.fixed          = true;
-params.Ta.fixed         = true;
-params.alpha.fixed      = true;
-params.m.fixed          = false;
-params.cp.fixed         = true;
-params.epsilon.fixed    = true;
-params.sigma.fixed      = true;
-params.T_inf.fixed      = true;
-
-
-
+T0 = 20; % Initial guess
 
 %% set up idnlgrey model
 file_name = 'odeFun';   % File describing the model structure.
@@ -84,15 +62,17 @@ nlgr = setpar(nlgr, 'Value', {params.U.value,...
                                 params.sigma.value,...
                                 params.T_inf.value});
 % set up state in model 
-T0 = 20; % Initial guess
 nlgr = setinit(nlgr, 'Name', 'Temperature');
 nlgr = setinit(nlgr, 'unit', 'C');
-nlgr = setinit(nlgr, 'Value', T0);
 nlgr = setinit(nlgr, 'Fixed', false);
                             
 %% Configure nlgreyest                            
 opt = nlgreyestOptions('EstimateCovariance',true,...
                         'SearchMethod','lm',...
                         'Display','off');
-sys = greyest(data, nlgr, opt);
+% Turn off annoying warnings about input and output names :)
+warning('off','Ident:analysis:DataModelNameUnitMismatch')
+warning('off','Ident:analysis:DataModelIOReorder')
+
+sys = nlgreyest(data, nlgr, opt);
 end

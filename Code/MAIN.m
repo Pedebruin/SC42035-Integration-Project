@@ -12,11 +12,8 @@ For the course:
 
 %% ==== SETUP: ====
 
-% ---- Accessing functions from folders: ----
-cd 'System_Identification';
-N4SID = @N4SID;
-FDSID = @FDSID;
-cd ../
+% ---- Accessing folders: ----
+addpath('System_Identification')
 
 %% ==== EXPERIMENT DATA MANAGEMENT: ====
           
@@ -41,8 +38,9 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 1;
+makeN4SID = 0;
 makeFDSID = 0;
+makeGreyBox = 1;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -77,6 +75,36 @@ elseif makeFDSID
     % Simulate estimated model with identification data: 
     y = lsim(sys,h1s,tdata);
     ydata = [ydata; y' + RoomTemp];
+    
+elseif makeGreyBox
+    % ---- Setup initial parameters: ----
+    % Initial values:
+    Grey.U.value          = 5;   % W/(m^2k)
+    Grey.A.value          = 0.0012; % m^2
+    Grey.Ta.value         = 23;     % Celcius
+    Grey.alpha.value      = 0.01;% from % to heat flow
+    Grey.m.value          = 0.004;   % kg
+    Grey.cp.value         = 500;    %J/kg
+    Grey.epsilon.value    = 0.9;
+    Grey.sigma.value      = 5.67e-8;
+    Grey.T_inf.value      = 23;
+    
+    % Fixed or not?
+    Grey.U.fixed          = true;
+    Grey.A.fixed          = false;
+    Grey.Ta.fixed         = false;
+    Grey.alpha.fixed      = true;
+    Grey.m.fixed          = false;
+    Grey.cp.fixed         = true;
+    Grey.epsilon.fixed    = true;
+    Grey.sigma.fixed      = true;
+    Grey.T_inf.fixed      = false;
+
+    % ---- Run GreyBox: ----
+    [sys] = GreyBox(idd(:,1,1),Grey);
+    % Simulate estimated model with identification data: 
+    y = sim(sys,idd(:,1,1));
+    ydata = [ydata; y.y(:)];   
 end
 
 %% ==== PLOT: ====
