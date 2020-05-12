@@ -41,8 +41,8 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 1;
-makeFDSID = 0;
+makeN4SID = 0;
+makeFDSID = 1;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -68,12 +68,12 @@ elseif makeFDSID
     tau = 47;
     init_tf = tf(K,[tau 1],'InputDelay',d);
     % Simulate with rough estimate:
-    RoomTemp = idd.OutputData(1,1); %need to add room temperature offset.
+    RoomTemp = idd.OutputData(1,1);
     y = lsim(init_tf,h1s,tdata); 
     ydata = [ydata; y' + RoomTemp];
     
-    % ---- Refining with FDSID: ----
-    [sys] = FDSID(init_tf, idd);
+    % ---- FDSID: ----
+    [sys] = FDSID(idd, init_tf, RoomTemp);
     % Simulate estimated model with identification data: 
     y = lsim(sys,h1s,tdata);
     ydata = [ydata; y' + RoomTemp];

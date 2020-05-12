@@ -1,13 +1,19 @@
-function [sys] = FDSID(init_sys, idd)
+function [sys] = FDSID(idd, init_tf, offset)
 
+    % ---- Extracting data: ----
+    data = idd(:,1,1);
+    
+    % ---- Optimisation: ----
+
+    % Specify optimisation parameters:
     opt = tfestOptions( 'InitializeMethod','iv',...
-                        'OutputOffset',[17],...
+                        'OutputOffset',offset,...
                         'InitialCondition','zero',...
                         'Display','on');
 
-    % ---- Refinement: ----
-    data = idd(:,1,1);
-    sys = tfest(data,init_sys,opt);
+    % Run optimisation:
+    sys = tfest(data, 1, 0, NaN, opt);
+    %sys = tfest(data,init_tf,opt);
 
 end
 
