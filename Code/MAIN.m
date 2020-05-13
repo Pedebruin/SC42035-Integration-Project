@@ -38,9 +38,9 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 0;
+makeN4SID = 1;
 makeFDSID = 0;
-makeGreyBox = 1;
+makeGreyBox = 0;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -49,15 +49,14 @@ ydata = [];
 if makeN4SID
     % ---- N4SID: ---- 
     n4sid_settings.nx = 6;
-    n4sid_settings.system = 'siso 1';               
+    n4sid_settings.system = 'siso 1';   % Just to prepare for future steps           
     n4sid_settings.Ts = Ts;      
 
-    [ss1, x0] = N4SID(idd, n4sid_settings);
+    [ss1, x0 , RoomTemp] = N4SID(idd, n4sid_settings);
 
     % Simulate estimated model with identification data: 
     y = lsim(ss1,h1s,tdata,x0);
-    ydata = [ydata;y'];
-
+    ydata = [ydata;y' + RoomTemp(1)];
 elseif makeFDSID
     % ---- Initial guess constructed from data: ----
     % Values found:
