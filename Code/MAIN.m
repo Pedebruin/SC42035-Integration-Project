@@ -38,9 +38,9 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 1;
+makeN4SID = 0;
 makeFDSID = 0;
-makeGreyBox = 0;
+makeGreyBox = 1;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);

@@ -8,12 +8,13 @@ params: struct containing the to be estimated parameters, their initial
 values and wether they are fixed or not. 
 
 %}
-T0 = 20; % Initial guess
+T0 = mean(data.y(1:5,:),1); % Initial guess
+params.Ta.value = T0(1);
 
 %% set up idnlgrey model
 file_name = 'odeFun';   % File describing the model structure.
 Order = [1 1 1];        % Model orders [ny nu nx].
-InitialState = T0;      % Initial initial state (initial temperature)
+InitialState = T0(1);   % Initial initial state (initial temperature)
 Ts = 0;                 % Continuous time system
 
 nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
@@ -64,7 +65,7 @@ nlgr = setpar(nlgr, 'Value', {params.U.value,...
 % set up state in model 
 nlgr = setinit(nlgr, 'Name', 'Temperature');
 nlgr = setinit(nlgr, 'unit', 'C');
-nlgr = setinit(nlgr, 'Fixed', false);
+nlgr = setinit(nlgr, 'Fixed', true);
                             
 %% Configure nlgreyest                            
 opt = nlgreyestOptions('EstimateCovariance',true,...
