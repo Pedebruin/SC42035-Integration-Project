@@ -40,8 +40,8 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 
 % ---- Switches: ----
 makeN4SID = 0;
-makeFDSID = 0;
-makeGreyBox = 1;
+makeFDSID = 1;
+makeGreyBox = 0;
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
@@ -96,17 +96,17 @@ end
 if makeFDSID
     % ---- Initial guess constructed from data: ----
     % Values found:
-    K = 1/3;
+    K = 1/3; %TODO: Automate this process
     d = 15;
     tau = 47;
     init_tf = tf(K,[tau 1],'InputDelay',d);
     % Simulate with rough estimate:
-    RoomTemp = idd.OutputData(1,1); %need to add room temperature offset.
+    RoomTemp = idd.OutputData(1,1);
     y = lsim(init_tf,h1s,tdata); 
     ydata = [ydata; y' + RoomTemp];
     
-    % ---- Refining with FDSID: ----
-    [sys] = FDSID(init_tf, idd);
+    % ---- FDSID: ----
+    [sys] = FDSID(idd, init_tf, RoomTemp);
     % Simulate estimated model with identification data: 
     y = lsim(sys,h1s,tdata);
     FDSID_Sim = y' + RoomTemp;
