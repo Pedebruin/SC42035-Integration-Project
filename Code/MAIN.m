@@ -17,18 +17,24 @@ addpath('System_Identification')
 
 %% ==== EXPERIMENT DATA MANAGEMENT: ====
 % ---- Load identifiation data: ----
-disp('Select data file')
+disp('Select identification data file')
 [file,path]= uigetfile('Experiments/*.mat');
 if isequal(file,0)
     error('No identification file has been selected')
 else
-    disp(['User selected: ', file]);
-    load(fullfile(path,file),'h1s','h2s','t1s','t2s')
+    disp(['User selected: ', file]); t2s = 0;
+    load(fullfile(path,file),'h1s','h2s','t1s','t2s');
+    h1s_i = h1s; clear h1s;
+    h2s_i = h2s; clear h2s;
+    t1s_i = t1s; clear t1s;
+    t2s_i = t2s; clear t2s;
 end
+measuredOutput_i = [t1s_i',t2s_i'];
+Input_i = [h1s_i',h2s_i'];
 
 % ---- Write identification data into iddata structure: ----
 Ts = 1;     %s
-idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
+idd = iddata([t1s_i', t2s_i'], [h1s_i', h2s_i'], Ts,...
               'OutputName', {'Temperature 1'; 'Temperature 2'},...
               'OutputUnit', {'Degree C'; 'Degree C'},...
               'InputName', {'Heater power 1'; 'Heater power 2'},...
@@ -39,14 +45,14 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 0;
+maken4sid = 1;
 makeFDSID = 0;
 makeGreyBox = 1;
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
 methods = cell(1,3);
-for i = {'makeN4SID','makeFDSID','makeGreyBox'}
+for i = {'maken4sid','makeFDSID','makeGreyBox'}
     if eval(cell2mat(i)) == 1
         methods{k} = i;
     else 
@@ -57,11 +63,12 @@ end
 
 
 % ---- Arrays to store simulation data: ----
-tdata = 0:length(t1s)-1;
+tdata = 0:length(t1s_i)-1;
 ydata = [];
 
-if makeN4SID
+if maken4sid
     % ---- N4SID: ---- 
+    disp(['Estimation: N4SID'])
     n4sid_settings.nx = 6;
     n4sid_settings.system = 'mimo';   % siso 1, siso 2, mimo          
     n4sid_settings.Ts = Ts;      
@@ -71,29 +78,30 @@ if makeN4SID
     % Select appropriate input sequence
     switch n4sid_settings.system(end)
         case '1'
-            u = h1s';
+            u = h1s_i';
         case '2'
-            u = h2s';
+            u = h2s_i';
         case 'o'
-            u = [h1s',h2s'];
+            u = [h1s_i',h2s_i'];
     end
     
     % simulate system
     switch n4sid_settings.system(end)
         case '1'
             y = lsim(sys_n4sid,u,tdata,x0);
-            N4SID_Sim = [y + RoomTemp, zeros(length(y),1)];  
+            n4sid_Sim = [y + RoomTemp, zeros(length(y),1)];  
         case '2'
             y = lsim(sys_n4sid,u,tdata,x0);
-            N4SID_Sim = [zeros(length(y),1), y + RoomTemp];
+            n4sid_Sim = [zeros(length(y),1), y + RoomTemp];
         case 'o'
             y = lsim(sys_n4sid,u,tdata,x0);
-            N4SID_Sim = y + RoomTemp;
+            n4sid_Sim = y + RoomTemp;
     end   
 end
 
 if makeFDSID
     % ---- Initial guess constructed from data: ----
+    disp('Estimation: FDSID')
     % Values found:
     K = 1/3; %TODO: Automate this process
     d = 15;
@@ -101,17 +109,18 @@ if makeFDSID
     init_tf = tf(K,[tau 1],'InputDelay',d);
     % Simulate with rough estimate:
     RoomTemp = idd.OutputData(1,1);
-    y = lsim(init_tf,h1s,tdata); 
+    y = lsim(init_tf,h1s_i,tdata); 
     ydata = [ydata; y' + RoomTemp];
     
     % ---- FDSID: ----
-    [sys_GreyBox] = FDSID(idd, init_tf, RoomTemp);
+    [sys_FDSID] = FDSID(idd, init_tf, RoomTemp);
     % Simulate estimated model with identification data: 
-    y = lsim(sys_GreyBox,h1s,tdata);
+    y = lsim(sys_FDSID,h1s_i,tdata);
     FDSID_Sim = y' + RoomTemp;
 end
 
 if makeGreyBox
+    disp('Estimation: GreyBox')
     GreyBox_settings.system = 'mimo';     % siso 1, siso 2, mimo           
     % ---- Setup initial parameters: ----
     % Initial values:
@@ -155,6 +164,35 @@ if makeGreyBox
     end
 end
 
+%% ==== MODEL VALIDATION: ====
+disp('Select validation data file')
+[file,path]= uigetfile('Experiments/*.mat');
+if isequal(file,0)
+    error('No validation file has been selected')
+else
+    disp(['User selected: ', file]);
+    load(fullfile(path,file),'h1s','h2s','t1s','t2s');
+    h1s_v = h1s; clear h1s;
+    h2s_v = h2s; clear h2s;
+    t1s_v = t1s; clear t1s;
+    t2s_v = t2s; clear t2s; 
+end
+measuredOutput_v = [t1s_v',t2s_v'];
+Input_v = [h1s_v',h2s_v'];
+
+
+
+[fit] = analysePerformance(sys_n4sid, Input_v, measuredOutput_v,n4sid_Sim);
+
+
+
+
+
+
+
+
+
+
 %% ==== PLOT: ====
 % ---- Switches: ----
 makeFigure = 1;
@@ -166,7 +204,8 @@ if makeFigure
             method = char(method);
             method = method(5:end);
             ydata = eval(strcat(method,'_Sim'));
-            makefigure(ydata, method,tdata, h1s, h2s, t1s, t2s, file);
+            [fit] = analysePerformance(eval(strcat('sys_',method)), Input_v, measuredOutput_v, ydata);
+            makefigure(ydata, method,tdata, Input_i, measuredOutput_i, fit);
         end
     end
 end
