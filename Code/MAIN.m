@@ -39,8 +39,8 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 
 % ---- Switches: ----
 makeN4SID = 0;
-makeFDSID = 0;
-makeGreyBox = 1;
+makeFDSID = 1;
+makeGreyBox = 0;
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -60,7 +60,7 @@ if makeN4SID
 elseif makeFDSID
     % ---- Initial guess constructed from data: ----
     % Values found:
-    K = 1/3;
+    K = 1/3; %TODO: Automate this process
     d = 15;
     tau = 47;
     init_tf = tf(K,[tau 1],'InputDelay',d);
