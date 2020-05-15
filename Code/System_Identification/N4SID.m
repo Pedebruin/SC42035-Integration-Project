@@ -70,7 +70,7 @@ switch settings.system(end)
         Ped3 = min(pexcit(data));
         
         % set system specific settings
-        opt = ssestOptions( 'OutputOffset', T0);
+        opt = ssestOptions( 'OutputOffset', T0');
         
         % Run N4SID and ss estimation algorithm. 
         nk1 = delayest(data(:,1,1));

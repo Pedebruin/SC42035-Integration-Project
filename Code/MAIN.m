@@ -39,7 +39,7 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 1;
+makeN4SID = 0;
 makeFDSID = 0;
 makeGreyBox = 1;
 
@@ -63,14 +63,35 @@ ydata = [];
 if makeN4SID
     % ---- N4SID: ---- 
     n4sid_settings.nx = 6;
-    n4sid_settings.system = 'siso 1';   % Just to prepare for future steps           
+    n4sid_settings.system = 'mimo';   % siso 1, siso 2, mimo          
     n4sid_settings.Ts = Ts;      
 
     [ss1, x0 , RoomTemp] = N4SID(idd, n4sid_settings);
 
-    % Simulate estimated model with identification data: 
-    y = lsim(ss1,h1s,tdata,x0);
-    N4SID_Sim = y' + RoomTemp(1);
+    % Select appropriate input sequence
+    switch n4sid_settings.system(end)
+        case '1'
+            u = h1s;
+        case '2'
+            u = h2s;
+        case 'o'
+            u = [h1s',h2s'];
+    end
+    
+    % simulate system
+    switch n4sid_settings.system(end)
+        case '1'
+            y = lsim(sys,idd(:,1,1));
+            N4SID_Sim = [y.y(:), zeros(length(y.y),1)];  
+        case '2'
+            y = lsim(sys,idd(:,2,2));
+            N4SID_Sim = [zeros(length(y.y),1), y.y(:)];
+        case 'o'
+            y = lsim(sys,idd);
+            N4SID_Sim = y.y;
+    end
+    y = lsim(ss1,u,tdata,x0);
+    N4SID_Sim = y' + RoomTemp(1);       % WORK HERE
 end
 if makeFDSID
     % ---- Initial guess constructed from data: ----
@@ -91,6 +112,8 @@ if makeFDSID
     FDSID_Sim = y' + RoomTemp;
 end
 if makeGreyBox
+    GreyBox_settings.system = 'mimo';     % siso 1, siso 2, mimo           
+    
     % ---- Setup initial parameters: ----
     % Initial values:
     Grey.U.value          = 5;   % W/(m^2k)
@@ -102,6 +125,7 @@ if makeGreyBox
     Grey.epsilon.value    = 0.9;
     Grey.sigma.value      = 5.67e-8;
     Grey.T_inf.value      = 23;
+    Grey.As.value         = 2e-4; 
     
     % Fixed or not?
     Grey.U.fixed          = true;
@@ -113,12 +137,23 @@ if makeGreyBox
     Grey.epsilon.fixed    = true;
     Grey.sigma.fixed      = true;
     Grey.T_inf.fixed      = false;
+    Grey.As.fixed         = false;
 
     % ---- Run GreyBox: ----
-    [sys] = GreyBox(idd(:,1,1),Grey);
+    [sys] = GreyBox(idd, Grey, GreyBox_settings);
+    
     % Simulate estimated model with identification data: 
-    y = sim(sys,idd(:,1,1));
-    GreyBox_Sim = y.y(:);   
+    switch GreyBox_settings.system(end)
+        case '1'
+            y = sim(sys,idd(:,1,1));
+            GreyBox_Sim = [y.y(:), zeros(length(y.y),1)];  
+        case '2'
+            y = sim(sys,idd(:,2,2));
+            GreyBox_Sim = [zeros(length(y.y),1), y.y(:)];
+        case 'o'
+            y = sim(sys,idd);
+            GreyBox_Sim = y.y;
+    end
 end
 
 %% ==== PLOT: ====
@@ -135,30 +170,53 @@ if makefigure
             method = method(5:end);
             
             ydata = strcat(method,'_Sim');
+            ydata1 = ydata(:,1);
+            ydata2 = ydata(:,2);
+            
             
             % ---- Figure setup: ----
             fig = figure('Name',method); 
             sgtitle(['Method: ',method, newline...
                       'ID_Data: ',file]);
-            ax1 = subplot(2,1,1);
-            ax2 = subplot(2,1,2);
-            hold(ax1, "on");
-            hold(ax2, "on");
+            ax11 = subplot(2,2,1);
+            ax12 = subplot(2,2,2);
+            ax21 = subplot(2,2,3);
+            ax22 = subplot(2,2,4);
+            hold(ax11, "on");
+            hold(ax12, "on");
+            hold(ax21, "on");
+            hold(ax22, "on");
+            
             % ---- Plots: ----
-            title(ax1,"Output")
-            plot(ax1,tdata,eval(ydata), 'DisplayName', method)
-            plot(ax1,tdata,t1s, 'DisplayName', 'Data')
-            ylim(ax1,[0 inf])
-            xlabel(ax1,"Time in [s]")
-            ylabel(ax1,"Sensors tempererature in [ºC]")
-            legend(ax1, 'Location', 'east')
+            title(ax11,"Output Heater 1")
+            plot(ax11,tdata,ydata1, 'DisplayName', method)
+            plot(ax11,tdata,t1s, 'DisplayName', 'Data')
+            ylim(ax11,[0 inf])
+            xlabel(ax11,"Time in [s]")
+            ylabel(ax11,"Sensor 1 tempererature in [ºC]")
+            legend(ax11, 'Location', 'east')
 
-            title(ax2,"Input")
-            plot(ax2,tdata,h1s, 'DisplayName', 'Heater 1')
-            ylim(ax2,[0 100])
-            xlabel(ax2,"Time in [s]")
-            ylabel(ax2,"Input heaters in [%]")
-            legend(ax2)
+            title(ax12,"output Heater 2")
+            plot(ax12,tdata,ydata2, 'DisplayName', method)
+            plot(ax12,tdata,t2s, 'DisplayName', 'Data')
+            ylim(ax12,[0 inf])
+            xlabel(ax12,"Time in [s]")
+            ylabel(ax12,"Sensor 1 tempererature in [ºC]")
+            legend(ax12, 'Location', 'east')            
+            
+            title(ax21,"Input heater 1")
+            plot(ax21,tdata,h1s, 'DisplayName', 'Heater 1')
+            ylim(ax21,[0 100])
+            xlabel(ax21,"Time in [s]")
+            ylabel(ax21,"Input heater 1 in [%]")
+            legend(ax21)
+            
+            title(ax22,"Input heater 2")
+            plot(ax22,tdata,h1s, 'DisplayName', 'Heater 1')
+            ylim(ax22,[0 100])
+            xlabel(ax22,"Time in [s]")
+            ylabel(ax22,"Input heater 2 in [%]")
+            legend(ax22)
         end
     end
 end
