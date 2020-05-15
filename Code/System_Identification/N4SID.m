@@ -1,4 +1,4 @@
-function [ss,x0] = N4SID(data, settings)
+function [ss,x0,T0] = N4SID(data, settings)
 %{ 
 This file fits a nth order model to a dataset using the N4SID subspace
 identification method and levenberg marquand optimisation.  
@@ -30,10 +30,11 @@ opt = ssestOptions( 'InitializeMethod','n4sid',...
                     'Display','on');
 nx = settings.nx;
 Ts = settings.Ts;
+% Estimate room temperature from first 5 samples. 
+T0 = mean(data.y(1:5,:),1);
 
 % Append initial zeros and equilibrium 
-Output = data.OutputData;
-Prefix = iddata([ones(nx,1)*Output(1,1), ones(nx,1)*Output(1,2)],...
+Prefix = iddata([ones(nx,1)*T0(1), ones(nx,1)*T0(2)],...
                 zeros(nx,2),Ts,...
               'OutputName', {'Temperature 1'; 'Temperature 2'},...
               'OutputUnit', {'Degree C'; 'Degree C'},...
@@ -41,11 +42,15 @@ Prefix = iddata([ones(nx,1)*Output(1,1), ones(nx,1)*Output(1,2)],...
               'InputUnit', {'%';'%'});          
 data = [Prefix; data];
 
+
 %% Main code
 switch settings.system(end)
     case "1"
         % Check percistancy of exitation
         Ped1 = pexcit(data(:,1,1));
+        
+        % set system specific settings
+        opt = ssestOptions( 'OutputOffset', T0(1));
 
         % Run N4SID and ss estimation algorithm. 
         nk = delayest(data(:,1,1));
@@ -54,12 +59,18 @@ switch settings.system(end)
     case "2"
         % Check percistancy of exitation
         Ped2 = pexcit(data(:,2,2));
-
+        
+        % set system specific settings
+        opt = ssestOptions( 'OutputOffset', T0(2));
+        
         % Run N4SID and ss estimation algorithm. 
         nk = delayest(data(:,2,2));
         [ss,x0] = ssest(data(:,2,2),1:max(1,Ped2),'InputDelay',nk,opt);
     case "o" 
         Ped3 = min(pexcit(data));
+        
+        % set system specific settings
+        opt = ssestOptions( 'OutputOffset', T0);
         
         % Run N4SID and ss estimation algorithm. 
         nk1 = delayest(data(:,1,1));
