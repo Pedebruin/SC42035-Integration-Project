@@ -1,4 +1,5 @@
 clear; close all
+set(0,'defaulttextInterpreter','latex') 
 %{
 This file serves as the main file for the integration project.  
 
@@ -38,9 +39,22 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 0;
+makeN4SID = 1;
 makeFDSID = 0;
 makeGreyBox = 1;
+
+% Store chosen options in cell array for plotting later. 
+k = 1;
+methods = cell(1,3);
+for i = {'makeN4SID','makeFDSID','makeGreyBox'}
+    if eval(cell2mat(i)) == 1
+        methods{k} = i;
+    else 
+        methods{k} = [];
+    end
+    k = k+1;
+end
+
 
 % ---- Arrays to store simulation data: ----
 tdata = 1:length(t1s);
@@ -56,8 +70,9 @@ if makeN4SID
 
     % Simulate estimated model with identification data: 
     y = lsim(ss1,h1s,tdata,x0);
-    ydata = [ydata;y' + RoomTemp(1)];
-elseif makeFDSID
+    N4SID_Sim = y' + RoomTemp(1);
+end
+if makeFDSID
     % ---- Initial guess constructed from data: ----
     % Values found:
     K = 1/3;
@@ -73,9 +88,9 @@ elseif makeFDSID
     [sys] = FDSID(init_tf, idd);
     % Simulate estimated model with identification data: 
     y = lsim(sys,h1s,tdata);
-    ydata = [ydata; y' + RoomTemp];
-    
-elseif makeGreyBox
+    FDSID_Sim = y' + RoomTemp;
+end
+if makeGreyBox
     % ---- Setup initial parameters: ----
     % Initial values:
     Grey.U.value          = 5;   % W/(m^2k)
@@ -103,7 +118,7 @@ elseif makeGreyBox
     [sys] = GreyBox(idd(:,1,1),Grey);
     % Simulate estimated model with identification data: 
     y = sim(sys,idd(:,1,1));
-    ydata = [ydata; y.y(:)];   
+    GreyBox_Sim = y.y(:);   
 end
 
 %% ==== PLOT: ====
@@ -111,29 +126,41 @@ end
 % ---- Switches: ----
 makefigure = 1;
 
+
 if makefigure
-    % ---- Figure setup: ----
-    fig = figure(1); 
-    ax1 = subplot(2,1,1);
-    ax2 = subplot(2,1,2);
-    hold(ax1, "on");
-    hold(ax2, "on");
-    
-    % ---- Plots: ----
-    title(ax1,"Output")
-    plot(ax1,tdata,ydata, 'DisplayName', 'Simulation')
-    plot(ax1,tdata,t1s, 'DisplayName', 'Data')
-    ylim(ax1,[0 inf])
-    xlabel(ax1,"Time in [s]")
-    ylabel(ax1,"Sensors tempererature in [ºC]")
-    legend(ax1, 'Location', 'east')
-    
-    title(ax2,"Input")
-    plot(ax2,tdata,h1s, 'DisplayName', 'Heater 1')
-    ylim(ax2,[0 100])
-    xlabel(ax2,"Time in [s]")
-    ylabel(ax2,"Input heaters in [%]")
-    legend(ax2)
+    for i = 1:length(methods)
+        method = methods{i};
+        if ~isempty(method) 
+            method = char(method);
+            method = method(5:end);
+            
+            ydata = strcat(method,'_Sim');
+            
+            % ---- Figure setup: ----
+            fig = figure('Name',method); 
+            sgtitle(['Method: ',method, newline...
+                      'ID_Data: ',file]);
+            ax1 = subplot(2,1,1);
+            ax2 = subplot(2,1,2);
+            hold(ax1, "on");
+            hold(ax2, "on");
+            % ---- Plots: ----
+            title(ax1,"Output")
+            plot(ax1,tdata,eval(ydata), 'DisplayName', method)
+            plot(ax1,tdata,t1s, 'DisplayName', 'Data')
+            ylim(ax1,[0 inf])
+            xlabel(ax1,"Time in [s]")
+            ylabel(ax1,"Sensors tempererature in [ºC]")
+            legend(ax1, 'Location', 'east')
+
+            title(ax2,"Input")
+            plot(ax2,tdata,h1s, 'DisplayName', 'Heater 1')
+            ylim(ax2,[0 100])
+            xlabel(ax2,"Time in [s]")
+            ylabel(ax2,"Input heaters in [%]")
+            legend(ax2)
+        end
+    end
 end
 
 disp('Done.')
