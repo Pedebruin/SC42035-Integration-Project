@@ -12,10 +12,12 @@ For the course:
 %}
 
 %% ==== SETUP: ====
+
 % ---- Accessing folders: ----
 addpath('System_Identification')
 
 %% ==== EXPERIMENT DATA MANAGEMENT: ====
+          
 % ---- Load identifiation data: ----
 disp('Select data file')
 [file,path]= uigetfile('Experiments/*.mat');
@@ -34,12 +36,10 @@ idd = iddata([t1s', t2s'], [h1s', h2s'], Ts,...
               'InputName', {'Heater power 1'; 'Heater power 2'},...
               'InputUnit', {'%';'%'});
           
-          
-          
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-makeN4SID = 0;
+makeN4SID = 1;
 makeFDSID = 0;
 makeGreyBox = 1;
 
@@ -159,17 +159,18 @@ end
 %% ==== PLOT: ====
 
 % ---- Switches: ----
-makeFigure = 1;
+makefigure = 1;
 
 
-if makeFigure
+if makefigure
     for i = 1:length(methods)
         method = methods{i};
         if ~isempty(method) 
             method = char(method);
             method = method(5:end);
             ydata = eval(strcat(method,'_Sim'));
-            makefigure(ydata, method,tdata, h1s, h2s, t1s, t2s, file);
+            [A] = makefigure(ydata, method, h1s, h2s, t1s, t2s);
+            
         end
     end
 end
