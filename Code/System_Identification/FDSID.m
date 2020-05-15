@@ -4,7 +4,7 @@ function [sys] = FDSID(idd, init_tf, offset)
     data = idd(:,1,1);
     
     % ---- Estimate delay: ----
-    d = delayest(data,1,1); %Estimate delay for an ARX 1-1 model.
+    d = delayest(data,1,1); %Estimate delay for an ARX 1-1 model. WEIRD!
     
     % ---- Least sqaures: ----
     
@@ -19,8 +19,8 @@ function [sys] = FDSID(idd, init_tf, offset)
     
     
     % Least squares:
-    thetaHat = (Hdata' * Hdata)\(Hdata' * ydata);
-    
+%     thetaHat = (Hdata' * Hdata)\(Hdata' * ydata);
+    thetaHat = pinv(Hdata)*ydata;
     
 %     % ---- Optimisation: ----
 % 
