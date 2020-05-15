@@ -66,7 +66,7 @@ if makeN4SID
     n4sid_settings.system = 'mimo';   % siso 1, siso 2, mimo          
     n4sid_settings.Ts = Ts;      
 
-    [ss1, x0 , RoomTemp] = N4SID(idd, n4sid_settings);
+    [sys_n4sid, x0 , RoomTemp] = N4SID(idd, n4sid_settings);
 
     % Select appropriate input sequence
     switch n4sid_settings.system(end)
@@ -81,13 +81,13 @@ if makeN4SID
     % simulate system
     switch n4sid_settings.system(end)
         case '1'
-            y = lsim(ss1,u,tdata,x0);
+            y = lsim(sys_n4sid,u,tdata,x0);
             N4SID_Sim = [y + RoomTemp, zeros(length(y),1)];  
         case '2'
-            y = lsim(ss1,u,tdata,x0);
+            y = lsim(sys_n4sid,u,tdata,x0);
             N4SID_Sim = [zeros(length(y),1), y + RoomTemp];
         case 'o'
-            y = lsim(ss1,u,tdata,x0);
+            y = lsim(sys_n4sid,u,tdata,x0);
             N4SID_Sim = y + RoomTemp;
     end   
 end
@@ -105,15 +105,14 @@ if makeFDSID
     ydata = [ydata; y' + RoomTemp];
     
     % ---- FDSID: ----
-    [sys] = FDSID(idd, init_tf, RoomTemp);
+    [sys_GreyBox] = FDSID(idd, init_tf, RoomTemp);
     % Simulate estimated model with identification data: 
-    y = lsim(sys,h1s,tdata);
+    y = lsim(sys_GreyBox,h1s,tdata);
     FDSID_Sim = y' + RoomTemp;
 end
 
 if makeGreyBox
     GreyBox_settings.system = 'mimo';     % siso 1, siso 2, mimo           
-    
     % ---- Setup initial parameters: ----
     % Initial values:
     Grey.U.value          = 5;   % W/(m^2k)
@@ -140,27 +139,25 @@ if makeGreyBox
     Grey.As.fixed         = false;
 
     % ---- Run GreyBox: ----
-    [sys] = GreyBox(idd, Grey, GreyBox_settings);
+    [sys_GreyBox] = GreyBox(idd, Grey, GreyBox_settings);
     
     % Simulate estimated model with identification data: 
     switch GreyBox_settings.system(end)
         case '1'
-            y = sim(sys,idd(:,1,1));
+            y = sim(sys_GreyBox,idd(:,1,1));
             GreyBox_Sim = [y.y(:), zeros(length(y.y),1)];  
         case '2'
-            y = sim(sys,idd(:,2,2));
+            y = sim(sys_GreyBox,idd(:,2,2));
             GreyBox_Sim = [zeros(length(y.y),1), y.y(:)];
         case 'o'
-            y = sim(sys,idd);
+            y = sim(sys_GreyBox,idd);
             GreyBox_Sim = y.y;
     end
 end
 
 %% ==== PLOT: ====
-
 % ---- Switches: ----
 makeFigure = 1;
-
 
 if makeFigure
     for i = 1:length(methods)

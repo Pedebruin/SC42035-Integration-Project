@@ -17,11 +17,24 @@ epsilon = emmisivity
 sigma   = stefan bolzman constant
 ->T_inf   = temperature of surrounding environment
 %}
-system = char(varargin{1});
+
+persistent Qhist
+
+system = varargin{1}{1};
+delay = varargin{1}{2};
 
 T = x;
 Q = u;
 
+
+% delay the input to the model by max(delay) amount of samples
+% if isempty(Qhist)
+%     Qhist = zeros(max(delay), size(u,2));
+% end
+% Qhist = [Q; Qhist(1:end-1,:)];
+% Q = Qhist(max(delay),:);  
+
+% Actual model    
 switch system(end)
     case '1'
         dT_conv = (U*A*(Ta - T)+alpha*Q)/(m*cp);                % convective heat transfer

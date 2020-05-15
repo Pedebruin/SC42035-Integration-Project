@@ -8,20 +8,24 @@ params: struct containing the to be estimated parameters, their initial
 values and wether they are fixed or not. 
 
 %}
-T0 = mean(data.y(1:5,:),1); % Initial guess
+T0 = mean(data.y(1:5,:),1); % Initial gues
 params.Ta.value = T0(1);
 
+d1 = delayest(data(:,1,1));
+d2 = delayest(data(:,2,2));
+d = [d1 d2];
 %% set up idnlgrey model for all 3 cases
 file_name = 'odeFun';   % File describing the model structure.       
 Ts = 0;                 % Continuous time system
 
 switch GreyBox_settings.system(end) 
     case '1'
+        varargin = {GreyBox_settings.system; d};
         Order = [1 1 1];    % Model orders [ny nu nx].
         InitialState = T0(1);   % Initial initial state (initial temperature)
         nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
                 'Name', 'Heater 1',...
-                'FileArgument',{GreyBox_settings.system});
+                'FileArgument',varargin);
             
         % set inputs and outputs   
         set(nlgr, 'InputName', 'Heater 1 percentage',...
@@ -38,11 +42,12 @@ switch GreyBox_settings.system(end)
         % cut data
         data = data(:,1,1);
     case '2'
+        varargin = {GreyBox_settings.system; d};
         Order = [1 1 1];    % Model orders [ny nu nx].
         InitialState = T0(2);   % Initial initial state (initial temperature)
         nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
                 'Name', 'Heater 2',...
-                'FileArgument',{GreyBox_settings.system});
+                'FileArgument',varargin);
         
         % set inputs and outputs
         set(nlgr, 'InputName', 'Heater 2 percentage',...
@@ -60,11 +65,12 @@ switch GreyBox_settings.system(end)
         data = data(:,2,2);
         
     case 'o'
+        varargin = {GreyBox_settings.system; d};
         Order = [2 2 2];    % Model orders [ny nu nx].
         InitialState = T0';   % Initial initial state (initial temperature)
         nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
                 'Name', 'Heaters',...
-                'FileArgument',{GreyBox_settings.system});
+                'FileArgument',varargin);
         
         % set inputs and outputs    
         set(nlgr, 'InputName', {'Heater 1 percentage'; 'Heater 2 percentage'} ,...
