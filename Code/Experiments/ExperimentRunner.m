@@ -13,14 +13,17 @@ PeriodSignal     = 30;%min
 Multiplier       = 1;
 
 Keyword = "Step";
-H1Signal = [40,0];
+H1Signal = [80,0];
 H2Signal = [0,0];
 
 H1Initial = 0;
 H2Initial = 0;
 
 if length(H1Signal) ~= length(H2Signal)
-    error('Signal arrays H1Signal and H2Signal are not of same length.')
+    beep on;
+    beep;
+    beep off;
+    error('Signal arrays H1Signal and H2Signal are not of same length.');
 else
     LengthExperiment = ((InitialRestTime + ...
         PeriodSignal * length(H1Signal)) * 60) ...
@@ -47,6 +50,7 @@ if DoExperiment == 'y'
     
     for i = 1:LengthExperiment
         tic;
+        textwaitbar(i,LengthExperiment,'Progress');
         
         % ---- Give inputs: ----
         
@@ -58,9 +62,6 @@ if DoExperiment == 'y'
             if currentPeriod > length(H1Signal) %make that last step is still part of last period.
                 currentPeriod = length(H1Signal);
             end
-%TODO update text + beep:
-%             disp('Turn on Heater 1 to ' + string(H1Signal(currentPeriod)) + '%')
-%             disp('Turn on Heater 2 to ' + string(H2Signal(currentPeriod)) + '%')
             h1(H1Signal(currentPeriod));
             h2(H2Signal(currentPeriod));
         end
@@ -114,8 +115,8 @@ if DoExperiment == 'y'
         pause(max(0.01,1.0-t)) %Synchronise to 1 sec before next for loop step.
     end
 
-    disp('Experiment is complete.')
-    disp('Turning off heaters. Caution! May still be hot!')
+    disp('Experiment is complete.');
+    disp('Turning off heaters. Caution! May still be hot!');
     h1(0);
     h2(0);
 
@@ -156,11 +157,14 @@ if DoExperiment == 'y'
         '_H2-' + H2String + ...
         '_MLT' + string(Multiplier) + ...
         '_LEN' + string(LengthExperiment) + ...
-        '_' + string(DateSerial));
+        '_' + string(DateSerial) + ...
+        '.mat');
 
     save(Filename,'Experiment');
 
     disp('Data saved.');
+    load handel %Play success sound.
+    sound(y,Fs)
 end
 
 disp('Done.');
