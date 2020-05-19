@@ -1,4 +1,4 @@
-function [sys] = GreyBox(data,params,GreyBox_settings)
+function [sys] = GreyBox(data, params, settings)
 %{
 This file estimates a grey box model for one heater of the temperature
 control lab. 
@@ -8,7 +8,7 @@ params: struct containing the to be estimated parameters, their initial
 values and wether they are fixed or not. 
 
 %}
-T0 = mean(data.y(1:5,:),1); % Initial gues
+T0 = settings.T0;
 params.Ta.value = T0(1);
 
 d1 = delayest(data(:,1,1));
@@ -18,9 +18,9 @@ d = [d1 d2];
 file_name = 'odeFun';   % File describing the model structure.       
 Ts = 0;                 % Continuous time system
 
-switch GreyBox_settings.system(end) 
+switch settings.system(end) 
     case '1'
-        varargin = {GreyBox_settings.system; d};
+        varargin = {settings.system; d};
         Order = [1 1 1];    % Model orders [ny nu nx].
         InitialState = T0(1);   % Initial initial state (initial temperature)
         nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
@@ -42,7 +42,7 @@ switch GreyBox_settings.system(end)
         % cut data
         data = data(:,1,1);
     case '2'
-        varargin = {GreyBox_settings.system; d};
+        varargin = {settings.system; d};
         Order = [1 1 1];    % Model orders [ny nu nx].
         InitialState = T0(2);   % Initial initial state (initial temperature)
         nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
@@ -65,7 +65,7 @@ switch GreyBox_settings.system(end)
         data = data(:,2,2);
         
     case 'o'
-        varargin = {GreyBox_settings.system; d};
+        varargin = {settings.system; d};
         Order = [2 2 2];    % Model orders [ny nu nx].
         InitialState = T0';   % Initial initial state (initial temperature)
         nlgr = idnlgrey(file_name, Order, ones(1,numel(fieldnames(params))), InitialState, Ts, ...
@@ -133,7 +133,7 @@ nlgr = setpar(nlgr, 'Value', {params.U.value,...
 %% Configure nlgreyest                            
 opt = nlgreyestOptions('EstimateCovariance',true,...
                         'SearchMethod','lm',...
-                        'Display','off');
+                        'Display','on');
 % Turn off annoying warnings about input and output names :)
 warning('off','Ident:analysis:DataModelNameUnitMismatch')
 warning('off','Ident:analysis:DataModelIOReorder')
