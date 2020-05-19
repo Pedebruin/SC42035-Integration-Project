@@ -13,8 +13,8 @@ PeriodSignal     = 30;%min
 Multiplier       = 1;
 
 Keyword = "Step";
-H1Signal = [80,0];
-H2Signal = [0,0];
+H1Signal = [80,80,80,80,80, 0];
+H2Signal = [ 0,40,80,40, 0, 0];
 
 H1Initial = 0;
 H2Initial = 0;
