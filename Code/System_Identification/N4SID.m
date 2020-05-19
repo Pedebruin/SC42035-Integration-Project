@@ -72,7 +72,7 @@ switch settings.system(end)
         nk = delayest(data(:,2,2));
         [ss,x0] = ssest(data(:,2,2),1:max(1,Ped2),'InputDelay',nk,opt);
     case "o" 
-        Ped3 = min(pexcit(data));
+        
         
         % set system specific settings
         opt = ssestOptions( 'InitializeMethod','n4sid',...
@@ -86,7 +86,7 @@ switch settings.system(end)
         nk1 = delayest(data(:,1,1));
         nk2 = delayest(data(:,2,2));
        
-        [ss,x0] = ssest(data,1:max(1,Ped3),'InputDelay',[nk1 nk2],opt);      
+        [ss,x0] = ssest(data,1:settings.nx,'InputDelay',[nk1 nk2],opt);      
  
 end
 end

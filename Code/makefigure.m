@@ -34,7 +34,7 @@ hold(ax21, "on");
 hold(ax22, "on");
 
 % ---- Plots: ----
-title(ax11,['Output Heater 1',num2str(fit(1))])
+title(ax11,['Output Heater 1, fit: ',num2str(fit(1)),'$\%$'])
 plot(ax11,tdata,ydata1, 'DisplayName', method)
 plot(ax11,tdata,t1s, 'DisplayName', 'Data')
 ylim(ax11,[0 100])
@@ -42,7 +42,7 @@ xlabel(ax11,"Time in [s]")
 ylabel(ax11,"Sensor 1 tempererature in [C]")
 legend(ax11, 'Location', 'east')
 
-title(ax12,['output Heater 2',num2str(fit(2))])
+title(ax12,['output Heater 2, fit: ',num2str(fit(2)),'$\%$'])
 plot(ax12,tdata,ydata2, 'DisplayName', method)
 plot(ax12,tdata,t2s, 'DisplayName', 'Data')
 ylim(ax12,[0 100])

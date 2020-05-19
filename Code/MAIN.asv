@@ -35,7 +35,7 @@ end
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-maken4sid = 0;
+maken4sid = 1;
 makeFDSID = 0;
 makeGreyBox = 1;
 
