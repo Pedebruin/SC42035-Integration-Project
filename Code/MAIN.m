@@ -35,9 +35,9 @@ end
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-maken4sid = 0;
+maken4sid = 1;
 makeFDSID = 0;
-makeGreyBox = 1;
+makeGreyBox = 0;
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
@@ -188,11 +188,5 @@ for i = 1:length(methods)                   % for every possible method
         end
     end
 end
-
-
-
-
-
-
 
 disp('Done.')
