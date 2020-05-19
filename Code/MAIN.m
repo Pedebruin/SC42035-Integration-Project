@@ -45,9 +45,9 @@ idd = iddata([t1s_i', t2s_i'], [h1s_i', h2s_i'], Ts,...
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-maken4sid = 1;
-makeFDSID = 0;
-makeGreyBox = 1;
+maken4sid = 0;
+makeFDSID = 1;
+makeGreyBox = 0;
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
@@ -100,20 +100,21 @@ if maken4sid
 end
 
 if makeFDSID
-    % ---- Initial guess constructed from data: ----
-    disp('Estimation: FDSID')
-    % Values found:
-    K = 1/3; %TODO: Automate this process
-    d = 15;
-    tau = 47;
-    init_tf = tf(K,[tau 1],'InputDelay',d);
-    % Simulate with rough estimate:
-    RoomTemp = idd.OutputData(1,1);
-    y = lsim(init_tf,h1s_i,tdata); 
-    ydata = [ydata; y' + RoomTemp];
+%     % ---- Initial guess constructed from data: ----
+%     disp('Estimation: FDSID')
+%     % Values found:
+%     K = 1/3; %TODO: Automate this process
+%     d = 15;
+%     tau = 47;
+%     init_tf = tf(K,[tau 1],'InputDelay',d);
+%     % Simulate with rough estimate:
+%     RoomTemp = idd.OutputData(1,1);
+%     y = lsim(init_tf,h1s_i,tdata); 
+%     ydata = [ydata; y' + RoomTemp];
     
     % ---- FDSID: ----
-    [sys_FDSID] = FDSID(idd, init_tf, RoomTemp);
+    FDSID_settings.system = 'siso 1'; % siso 1, siso 2, mimo
+    [sys_FDSID, RoomTemp] = FDSID(idd, FDSID_settings);
     % Simulate estimated model with identification data: 
     y = lsim(sys_FDSID,h1s_i,tdata);
     FDSID_Sim = y' + RoomTemp;
