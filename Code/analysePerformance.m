@@ -1,9 +1,14 @@
-function [fit] = analysePerformance(sys, idd_v, simulatedOutput)
-y1 = simulatedOutput(:,1);
-y2 = simulatedOutput(:,2);
+function [fit] = analysePerformance(sys, idd_v, Sim_data)
 
-fit1 = goodnessOfFit(y1, idd_v.y(:,1), 'NRMSE');
-fit2 = goodnessOfFit(y2, idd_v.y(:,2), 'NRMSE');
+% Get the NMSE fit
+fit = (1-goodnessOfFit(Sim_data, idd_v.y, 'NRMSE'))'*100;
+fit = round(fit,2);
 
-fit = [fit1, fit2];
+
+
+% Get the residual analysis (Still in progress)
+figure()
+resid(idd_v, sys);
+
+
 end

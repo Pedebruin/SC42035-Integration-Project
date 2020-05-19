@@ -15,6 +15,7 @@ For the course:
 % ---- Accessing folders: ----
 addpath('System_Identification')
 
+
 %% ==== EXPERIMENT DATA MANAGEMENT: ====
 % ---- Load identifiation data: ----
 disp('Select identification data file')
@@ -34,9 +35,10 @@ end
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-maken4sid = 0;
-makeFDSID = 1;
+maken4sid = 1;
+makeFDSID = 0;
 makeGreyBox = 0;
+
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
@@ -110,6 +112,9 @@ if makeGreyBox
     [sys_GreyBox] = GreyBox(idd_i, Grey, GreyBox_settings);
 end
 
+
+
+
 %% ==== MODEL VALIDATION: ====
 makeFigure = 1;
 
@@ -173,6 +178,8 @@ if makeGreyBox
 end
 
 
+
+% Evaluate performance of simulated systems and plot
 for i = 1:length(methods)                   % for every possible method
     method = methods{i};
     if ~isempty(method)                     % if method is used   
@@ -187,8 +194,6 @@ for i = 1:length(methods)                   % for every possible method
         end
     end
 end
-
-
 
 
 

@@ -28,11 +28,13 @@ Q = u;
 
 
 % delay the input to the model by max(delay) amount of samples
-% if isempty(Qhist)
-%     Qhist = zeros(max(delay), size(u,2));
-% end
-% Qhist = [Q; Qhist(1:end-1,:)];
-% Q = Qhist(max(delay),:);  
+if isempty(Qhist)
+    Qhist = zeros(max(delay), size(u,2));
+end
+
+Qhist = [Q; Qhist(1:end-1,:)];
+Q = Qhist(max(delay),:);  
+
 
 % Actual model    
 switch system(end)
