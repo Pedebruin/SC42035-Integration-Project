@@ -54,7 +54,7 @@ end
 % ---- Arrays to store simulation data: ----
 tdata = 0:lengthExperiment-1;
 ydata = [];
-T0 = mean(idd_i.y(1:45,:),1);
+T0 = mean(idd_i.y(1:55,:),1);
 
 if maken4sid
     % ---- N4SID: ---- 
@@ -69,25 +69,12 @@ end
 
 if makeFDSID
     disp('Estimation: FDSID')
-%     % ---- Initial guess constructed from data: ----
-%     disp('Estimation: FDSID')
-%     % Values found:
-%     K = 1/3; %TODO: Automate this process
-%     d = 15;
-%     tau = 47;
-%     init_tf = tf(K,[tau 1],'InputDelay',d);
-%     % Simulate with rough estimate:
-%     RoomTemp = idd.OutputData(1,1);
-%     y = lsim(init_tf,h1s_i,tdata); 
-%     ydata = [ydata; y' + RoomTemp];
     
     % ---- FDSID: ----
     FDSID_settings.system = 'siso 1'; % siso 1, siso 2, mimo
-    [sys_FDSID, RoomTemp] = FDSID(idd, FDSID_settings);
+    FDSID_settings.T0 = T0;
+    [sys_FDSID] = FDSID(idd_i, FDSID_settings);
 
-    % Simulate estimated model with identification data: 
-    y = lsim(sys_FDSID,h1s_i,tdata);
-    FDSID_Sim = y' + RoomTemp;
 end
 
 if makeGreyBox
@@ -126,7 +113,7 @@ end
 %% ==== MODEL VALIDATION: ====
 makeFigure = 1;
 
-% Select validation set
+% ---- Select validation set: ----
 disp('Select validation data file:')
 [file,path]= uigetfile('Experiments/*.mat');
 if isequal(file,0)
@@ -139,7 +126,7 @@ else
     idd_v = Experiment.idd;
 end
 
-% simulate systems using validation dataset. 
+% ---- Simulate systems using validation dataset: ----
 if maken4sid
     disp('Simulating n4sid')
     switch n4sid_settings.system(end)
@@ -152,6 +139,21 @@ if maken4sid
         case 'o'
             y = lsim(sys_n4sid, idd_v.u, tdata, x0);
             n4sid_Sim = y + T0_n4sid';
+    end   
+end
+
+if makeFDSID
+    disp('Simulating FDSID')
+    switch FDSID_settings.system(end)
+        case '1'
+            y = lsim(sys_FDSID, idd_v.u(:,1), tdata);
+            FDSID_Sim = [y + T0, zeros(length(y),1)];  
+        case '2'
+            y = lsim(sys_FDSID, idd_v.u(:,2), tdata);
+            FDSID_Sim = [zeros(length(y),1), y + T0];
+        case 'o'
+            y = lsim(sys_FDSID, idd_v.u, tdata);
+            FDSID_Sim = y + T0;
     end   
 end
 
@@ -190,6 +192,6 @@ end
 
 
 
-
-
+load handel %Play success sound.
+sound(y,Fs)
 disp('Done.')
