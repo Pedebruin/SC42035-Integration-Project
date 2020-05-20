@@ -35,8 +35,8 @@ end
 %% ==== IDENTIFICATION: ====
 
 % ---- Switches: ----
-maken4sid = 1;
-makeFDSID = 0;
+maken4sid   = 0;
+makeFDSID   = 1;
 makeGreyBox = 0;
 
 
@@ -73,8 +73,9 @@ if makeFDSID
     disp('Estimation: FDSID')
     
     % ---- FDSID: ----
-    FDSID_settings.system = 'siso 1'; % siso 1, siso 2, mimo
+    FDSID_settings.system = 'mimo'; % siso 1, siso 2, mimo
     FDSID_settings.T0 = T0;
+    FDSID_settings.Ts = idd_i.Ts; 
     [sys_FDSID] = FDSID(idd_i, FDSID_settings);
 
 end
@@ -152,13 +153,13 @@ if makeFDSID
     switch FDSID_settings.system(end)
         case '1'
             y = lsim(sys_FDSID, idd_v.u(:,1), tdata);
-            FDSID_Sim = [y + T0, zeros(length(y),1)];  
+            FDSID_Sim = [y + T0(1), zeros(length(y),1)];  
         case '2'
             y = lsim(sys_FDSID, idd_v.u(:,2), tdata);
-            FDSID_Sim = [zeros(length(y),1), y + T0];
+            FDSID_Sim = [zeros(length(y),1), y + T0(2)];
         case 'o'
             y = lsim(sys_FDSID, idd_v.u, tdata);
-            FDSID_Sim = y + T0;
+            FDSID_Sim = y + T0; 
     end   
 end
 
@@ -197,6 +198,7 @@ end
 
 
 
-load handel %Play success sound.
+load handel %Play 'hallelujah' sound.
+% load gong   %Play 'gong' sound.
 sound(y,Fs)
 disp('Done.')

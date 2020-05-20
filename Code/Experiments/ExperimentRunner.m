@@ -9,12 +9,12 @@ disp('Experiment Runner ready')
 % ---- Signal shaping ----
 
 InitialRestTime  = 1;%min
-PeriodSignal     = 30;%min
+PeriodSignal     = 5;%min
 Multiplier       = 1;
 
 Keyword = "Step";
-H1Signal = [80,80,80,80,80, 0];
-H2Signal = [ 0,40,80,40, 0, 0];
+H1Signal = [ 1, 3, 5, 7, 9, 0];
+H2Signal = [ 0, 2, 4, 6, 8,10];
 
 H1Initial = 0;
 H2Initial = 0;
