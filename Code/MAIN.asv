@@ -43,8 +43,8 @@ if Identification
     end
 
     % pre processing ====
-        % bandwidth is about 7e-4 Hz.
-    idd_i.y = lowpass(idd_i.y,5e-3,1);
+        % bandwidth is about 7e-4 Hz, so cut off frequency at 1e-4. 
+    idd_i.y = lowpass(idd_i.y,1e-4,1);
 
 
 
@@ -125,8 +125,6 @@ if Identification
         save(strcat('./System_Identification/Models/GreyBox_',file),'sys_GreyBox');
     end
 end
-
-
 %% ==== MODEL VALIDATION: ====
 if Validation 
     % ---- Select validation set: ----
@@ -143,10 +141,6 @@ if Validation
         lengthExperiment = Experiment.LengthExperiment;
     end
     tdata = 0:lengthExperiment-1;
-    
-    % Filtering
-    idd_v.y = lowpass(idd_v.y,5e-3,1);
-
 
 
     % ---- Simulate systems using validation dataset: ----
