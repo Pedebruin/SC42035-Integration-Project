@@ -10,7 +10,7 @@ disp('Experiment Runner ready.')
 
 TypeSignal       = 'prbs'; %Options: step, prbs
 InitialRestTime  = 0;%min
-PeriodSignal     = 5;%min
+PeriodSignal     = 15;%min
 Multiplier       = 1;
 
 switch TypeSignal
@@ -32,7 +32,7 @@ switch TypeSignal
         Keyword = "PRBS";       %name for experiment, can change it. 
         
         Range = [0 100];        %make prbs go between 0% and 100% input.
-        MinNrUnchanged = 20;    %min nr. of steps the prbs does not change. 
+        MinNrUnchanged = 200;   %min nr. of steps the prbs does not change, should be > time constant.
         Band = [0 1/MinNrUnchanged];
         LengthExperiment = (InitialRestTime + PeriodSignal * Multiplier)*60;
         
