@@ -9,7 +9,7 @@ values and wether they are fixed or not.
 
 %}
 T0 = settings.T0;
-params.Ta.value = T0(1);
+params.Ta.value = mean(T0);
 
 d1 = delayest(data(:,1,1));
 d2 = delayest(data(:,2,2));
