@@ -21,7 +21,7 @@ Identification = 1;         % Identify models?
     makeFDSID   = 1;        % Use FDSID?
     makeGreyBox = 1;        % Use Grey Box?
     
-Validation = 1;             % Validate models?
+Validation = 0;             % Validate models?
     makeFigure = 1;         % Plot the result?
 
 
