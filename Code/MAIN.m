@@ -17,11 +17,11 @@ addpath('System_Identification')
 addpath('System_Identification/Models')
 
 % ---- Settings: ----
-Identification = 0;         % Identify models?
+Identification = 1;         % Identify models?
 Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
-    makeFDSID   = 1;        % Use FDSID?
-    makeGreyBox = 1;        % Use Grey Box?
+    makeFDSID   = 0;        % Use FDSID?
+    makeGreyBox = 0;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
@@ -69,11 +69,32 @@ if Identification
     if maken4sid
         % ---- N4SID: ---- 
         disp('Estimation: N4SID')
-        n4sid_settings.nx = 6;
-        n4sid_settings.system = system;   % siso 1, siso 2, mimo          
+        N = 25;                            % till what order do you want to estimate the model?
+        n4sid_settings.system = system;     % siso 1, siso 2, mimo          
         n4sid_settings.Ts = idd_i.Ts;  
         n4sid_settings.T0 = T0;
+      
+        orderPlot = 0;
+        
+        if orderPlot
+            % fit multiple order models to get the fit percentage per order
+            fits = zeros(2,N);
+            vaf = zeros(1,N);
+            for i = 1:N
+                n4sid_settings.nx = i;    
+                [sys_n4sid, x0_n4sid , T0_n4sid] = N4SID(idd_i, n4sid_settings);
+                fits(:,i) = sys_n4sid.Report.Fit.FitPercent;
+            end
 
+            % plot fit percentage per order
+            figure 
+            hold on
+            plot(1:N,mean(fits,1),'o')
+        end
+
+        % Do actual estimation with variable model oder, select based on
+        % last figure and singular value plot!
+        n4sid_settings.nx = 1:N;
         [sys_n4sid, x0_n4sid , T0_n4sid] = N4SID(idd_i, n4sid_settings);
 
         save(strcat('./System_Identification/Models/n4sid_',file),'sys_n4sid');
