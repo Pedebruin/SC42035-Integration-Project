@@ -14,15 +14,17 @@ For the course:
 %% ==== SETUP: ====
 % ---- Accessing folders: ----
 addpath('System_Identification')
+addpath('System_Identification/Models')
 
 % ---- Settings: ----
 Identification = 1;         % Identify models?
+Validation = 0;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
     makeFDSID   = 1;        % Use FDSID?
     makeGreyBox = 1;        % Use Grey Box?
-    
-Validation = 1;             % Validate models?
     makeFigure = 1;         % Plot the result?
+    
+
 
 
 
@@ -43,8 +45,8 @@ if Identification
     end
 
     % pre processing ====
-        % bandwidth is about 7e-4 Hz, so cut off frequency at 1e-4. 
-    idd_i.y = lowpass(idd_i.y,1e-4,1);
+        % bandwidth is about 7e-4 Hz.
+    idd_i.y = lowpass(idd_i.y,5e-3,1);
 
 
 
@@ -125,6 +127,8 @@ if Identification
         save(strcat('./System_Identification/Models/GreyBox_',file),'sys_GreyBox');
     end
 end
+
+
 %% ==== MODEL VALIDATION: ====
 if Validation 
     % ---- Select validation set: ----
@@ -141,10 +145,27 @@ if Validation
         lengthExperiment = Experiment.LengthExperiment;
     end
     tdata = 0:lengthExperiment-1;
+    
+    % Filtering
+    idd_v.y = lowpass(idd_v.y,5e-3,1);
+
 
 
     % ---- Simulate systems using validation dataset: ----
     if maken4sid
+        
+        % if it is not generated previously, select it from other models. 
+        if ~exist('sys_n4sid')
+            disp('select n4sid model')
+            [file,path]= uigetfile('System_Identification/Models/n4sid*.mat');
+            if isequal(file,0)
+                error('No model has been selected')
+            else
+                disp(['     User selected: ', file]);
+                load(fullfile(path,file),'sys_n4sid');
+            end
+        end
+            
         disp('Simulating n4sid')
         switch n4sid_settings.system(end)
             case '1'
@@ -159,7 +180,22 @@ if Validation
         end   
     end
 
+    
+    
     if makeFDSID
+        
+        % if it is not generated previously, select it from other models. 
+        if ~exist('sys_FDSID')
+            disp('select FDSID model')
+            [file,path]= uigetfile('System_Identification/Models/fdsid*.mat');
+            if isequal(file,0)
+                error('No model has been selected')
+            else
+                disp(['     User selected: ', file]);
+                load(fullfile(path,file),'sys_FDSID');
+            end
+        end
+        
         disp('Simulating FDSID')
         switch FDSID_settings.system(end)
             case '1'
@@ -174,7 +210,22 @@ if Validation
         end   
     end
 
+    
+    
     if makeGreyBox
+        
+        % if it is not generated previously, select it from other models. 
+        if ~exist('sys_GreyBox')
+            disp('select n4sid model')
+            [file,path]= uigetfile('System_Identification/Models/GreyBox*.mat');
+            if isequal(file,0)
+                error('No model has been selected')
+            else
+                disp(['     User selected: ', file]);
+                load(fullfile(path,file),'sys_GreyBox');
+            end
+        end
+        
         disp('Simulating GreyBox')
         switch GreyBox_settings.system(end)
             case '1'
@@ -190,6 +241,11 @@ if Validation
     end
 
 
+    
+    
+    
+    
+    
     % Evaluate performance of simulated systems and plot
     for i = 1:length(methods)                   % for every possible method
         method = methods{i};
