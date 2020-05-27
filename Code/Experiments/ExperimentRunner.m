@@ -36,7 +36,7 @@ switch TypeSignal
         Band = [0 1/MinNrUnchanged];
         LengthExperiment = (InitialRestTime + PeriodSignal * Multiplier)*60;
         
-        prbsSignal = idinput([LengthExperiment,2], 'prbs', Band, Range); % prbs signal for 2 channels without multiplier.
+        prbsSignal = flip(idinput([LengthExperiment,2], 'prbs', Band, Range),1); % prbs signal for 2 channels without multiplier.
         H1Signal = prbsSignal(:,1)';
         H2Signal = prbsSignal(:,2)'; 
     otherwise
