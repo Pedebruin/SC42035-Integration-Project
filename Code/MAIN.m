@@ -69,7 +69,7 @@ if Identification
     if maken4sid
         % ---- N4SID: ---- 
         disp('Estimation: N4SID')
-        N = 25;                            % till what order do you want to estimate the model?
+        N = 20;                            % till what order do you want to estimate the model?
         n4sid_settings.system = system;     % siso 1, siso 2, mimo          
         n4sid_settings.Ts = idd_i.Ts;  
         n4sid_settings.T0 = T0;
