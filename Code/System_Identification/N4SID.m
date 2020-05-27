@@ -80,8 +80,8 @@ switch settings.system(end)
         nk1 = delayest(data(:,1,1));
         nk2 = delayest(data(:,2,2));
        
-        [ss,x0] = ssest(data,min(Ped,nx),'InputDelay',[nk1 nk2],opt);      
- 
+        [ss,x0] = ssest(data,min(Ped,nx),'InputDelay',[nk1 nk2],opt);  
+        ss.UserData = T0;
 end
 end
 

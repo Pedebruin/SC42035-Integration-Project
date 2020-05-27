@@ -21,8 +21,8 @@ addpath('Functions')
 identification = 1;         % Identify models?
 Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
-    makeFDSID   = 0;        % Use FDSID?
-    makeGreyBox = 0;        % Use Grey Box?
+    makeFDSID   = 1;        % Use FDSID?
+    makeGreyBox = 1;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
@@ -106,6 +106,7 @@ if identification
         FDSID_settings.T0 = T0;
         FDSID_settings.Ts = idd_i.Ts; 
         [sys_FDSID] = FDSID(idd_i, FDSID_settings);
+        
 
         save(strcat('./System_Identification/Models/fdsid_',file),'sys_FDSID');
     end
@@ -141,6 +142,7 @@ if identification
 
         % ---- Run GreyBox: ----
         [sys_GreyBox] = GreyBox(idd_i, Grey, GreyBox_settings);
+
 
         save(strcat('./System_Identification/Models/GreyBox_',file),'sys_GreyBox');
     end
