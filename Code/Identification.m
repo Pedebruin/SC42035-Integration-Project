@@ -19,9 +19,9 @@ addpath('Functions')
 
 % ---- Settings: ----
 identification = 1;         % Identify models?
-Validation = 0;             % Validate models?
+Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
-    makeFDSID   = 1;        % Use FDSID?
+    makeFDSID   = 0;        % Use FDSID?
     makeGreyBox = 0;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
@@ -58,7 +58,7 @@ if identification
 
     % pre processing ====
         % bandwidth is about 7e-4 Hz.
-    %idd_i.y = lowpass(idd_i.y,5e-3,1);
+    idd_i.y = lowpass(idd_i.y,5e-3,1);
 
     % ---- Arrays to store simulation data: ----
     ydata = [];
