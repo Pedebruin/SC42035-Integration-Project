@@ -1,7 +1,7 @@
 clear; close all
 set(0,'defaulttextInterpreter','latex') 
 %{
-This file serves as the main file for the integration project.  
+This file serves as the main file for the identification part of the integration project.  
 
 Written by:
     Pim de Bruin 
@@ -18,14 +18,15 @@ addpath('System_Identification/Models')
 addpath('Functions')
 
 % ---- Settings: ----
-Identification = 0;         % Identify models?
-Validation = 1;             % Validate models?
+identification = 1;         % Identify models?
+Validation = 0;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
     makeFDSID   = 1;        % Use FDSID?
-    makeGreyBox = 1;        % Use Grey Box?
+    makeGreyBox = 0;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
+
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
@@ -41,7 +42,7 @@ for i = {'maken4sid','makeFDSID','makeGreyBox'}
 end
 
 %% ==== IDENTIFICATION: ====
-if Identification
+if identification
     % ---- Load identifiation data: ----
     disp('Select identification data file')
     [file,path]= uigetfile('Experiments/*.mat');
@@ -57,7 +58,7 @@ if Identification
 
     % pre processing ====
         % bandwidth is about 7e-4 Hz.
-    idd_i.y = lowpass(idd_i.y,5e-3,1);
+    %idd_i.y = lowpass(idd_i.y,5e-3,1);
 
     % ---- Arrays to store simulation data: ----
     ydata = [];
