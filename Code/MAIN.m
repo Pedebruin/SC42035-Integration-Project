@@ -17,11 +17,11 @@ addpath('System_Identification')
 addpath('System_Identification/Models')
 
 % ---- Settings: ----
-Identification = 1;         % Identify models?
+Identification = 0;         % Identify models?
 Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
-    makeFDSID   = 0;        % Use FDSID?
-    makeGreyBox = 0;        % Use Grey Box?
+    makeFDSID   = 1;        % Use FDSID?
+    makeGreyBox = 1;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
@@ -149,6 +149,7 @@ if Identification
 end
 
 
+
 %% ==== MODEL VALIDATION: ====
 if Validation 
     % ---- Select validation set: ----
@@ -169,7 +170,7 @@ if Validation
 
     
     % Filtering
-    idd_v.y = lowpass(idd_v.y,5e-3,1);
+    %idd_v.y = lowpass(idd_v.y,5e-3,1);
 
 
 
@@ -264,11 +265,6 @@ if Validation
     end
 
 
-    
-    
-    
-    
-    
     % Evaluate performance of simulated systems and plot
     for i = 1:length(methods)                   % for every possible method
         method = methods{i};
@@ -287,7 +283,7 @@ if Validation
 end
 
 
-load handel %Play 'hallelujah' sound.
+% % load handel %Play 'hallelujah' sound.
 % load gong   %Play 'gong' sound.
-sound(y,Fs)
-disp('Done.')
+% sound(y,Fs)
+% disp('Done.')

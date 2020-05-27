@@ -11,4 +11,20 @@ figure()
 resid(idd_v, sys);
 
 
+%{
+% plot power of input signal
+y = fft(idd_v.u(:,1));
+n = length(idd1.u);          % number of samples
+f = (0:n-1)*(fs/n);     % frequency range
+power = abs(y).^2/n;    % power of the DFT
+
+figure()
+semilogx(f,power)
+xline(7e-4)
+xlabel('Frequency')
+ylabel('Power')
+%}
+
+
+
 end
