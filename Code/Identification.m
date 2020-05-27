@@ -15,20 +15,17 @@ For the course:
 % ---- Accessing folders: ----
 addpath('System_Identification')
 addpath('System_Identification/Models')
+addpath('Functions')
 
 % ---- Settings: ----
-Identification = 1;         % Identify models?
+Identification = 0;         % Identify models?
 Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
-    makeFDSID   = 0;        % Use FDSID?
-    makeGreyBox = 0;        % Use Grey Box?
+    makeFDSID   = 1;        % Use FDSID?
+    makeGreyBox = 1;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
-
-
-
-
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
@@ -69,7 +66,7 @@ if Identification
     if maken4sid
         % ---- N4SID: ---- 
         disp('Estimation: N4SID')
-        N = 25;                            % till what order do you want to estimate the model?
+        N = 20;                            % till what order do you want to estimate the model?
         n4sid_settings.system = system;     % siso 1, siso 2, mimo          
         n4sid_settings.Ts = idd_i.Ts;  
         n4sid_settings.T0 = T0;
@@ -149,6 +146,7 @@ if Identification
 end
 
 
+
 %% ==== MODEL VALIDATION: ====
 if Validation 
     % ---- Select validation set: ----
@@ -169,7 +167,7 @@ if Validation
 
     
     % Filtering
-    idd_v.y = lowpass(idd_v.y,5e-3,1);
+    %idd_v.y = lowpass(idd_v.y,5e-3,1);
 
 
 
@@ -264,11 +262,6 @@ if Validation
     end
 
 
-    
-    
-    
-    
-    
     % Evaluate performance of simulated systems and plot
     for i = 1:length(methods)                   % for every possible method
         method = methods{i};
@@ -287,7 +280,7 @@ if Validation
 end
 
 
-load handel %Play 'hallelujah' sound.
+% % load handel %Play 'hallelujah' sound.
 % load gong   %Play 'gong' sound.
-sound(y,Fs)
-disp('Done.')
+% sound(y,Fs)
+% disp('Done.')
