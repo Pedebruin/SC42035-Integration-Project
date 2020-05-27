@@ -15,6 +15,7 @@ For the course:
 % ---- Accessing folders: ----
 addpath('System_Identification')
 addpath('System_Identification/Models')
+addpath('Functions')
 
 % ---- Settings: ----
 Identification = 0;         % Identify models?
@@ -25,10 +26,6 @@ Validation = 1;             % Validate models?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
-
-
-
-
 
 % Store chosen options in cell array for plotting later. 
 k = 1;
