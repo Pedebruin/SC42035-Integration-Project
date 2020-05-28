@@ -29,7 +29,7 @@ load(GreyBox_file.name)
 
 % ---- Get workable models: ----
 n4sid = pade(ss(sys_n4sid),1);
-fdsid = minreal(pade(ss(sys_n4sid)));
+fdsid = minreal(pade(ss(sys_FDSID))); % convert to continuous
 % still need to linearise the greybox model! 
 
 
@@ -41,9 +41,9 @@ G = n4sid;
 %% ==== HINF: ====
 % ---- Set up generalised plant: ----
 s= tf([1 0],1);
-bw = 7e-3*2*pi;       % Bandwidth for each output [rad/s]
-M_1 = 1.8;          % Upper bound for Hinf norm
-A_1 = 1e-4;         % Attenuation of low frequency disturbances  
+bw = 7e-3*2*pi;         % Bandwidth for each output [rad/s]
+M_1 = 1.8;              % Upper bound for Hinf norm
+A_1 = 1e-4;             % Attenuation of low frequency disturbances  
 W_p = (s/M_1 + bw)/(s + bw*A_1);
 
 
@@ -70,6 +70,8 @@ T = 1500;                   % s
 
 T0 = G.UserData;
 R = (r - T0');
+
+CL = feedback(K*G,tf(eye(2)));
 
 simOut = sim('System','StartTime','0','StopTime',num2str(T));  
 y = simOut.get('y') + T0';
