@@ -47,8 +47,6 @@ A_1 = 1e-4;             % Attenuation of low frequency disturbances
 W_p = (s/M_1 + bw)/(s + bw*A_1);
 
 
-
-
 Wp = [W_p 0; 0 W_p];            % ideal sensitivity function S
 Wu = tf(eye(2));                % ideal control input signal U
 Wt = tf(eye(2));                % ideal transfer function T
