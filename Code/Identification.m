@@ -18,14 +18,15 @@ addpath('System_Identification/Models')
 addpath('Functions')
 
 % ---- Settings: ----
-identification = 1;         % Identify models?
-Validation = 0;             % Validate models?
+identification = 0;         % Identify models?
+Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
-    makeFDSID   = 1;        % Use FDSID?
+    makeFDSID   = 0;        % Use FDSID?
     makeGreyBox = 0;        % Use Grey Box?
 makeFigure = 1;             % Plot the result?
     
 system = 'mimo';            % siso 1, siso 2, mimo?
+
 
 
 % Store chosen options in cell array for plotting later. 
@@ -58,7 +59,7 @@ if identification
 
     % pre processing ====
         % bandwidth is about 7e-4 Hz.
-    %idd_i.y = lowpass(idd_i.y,5e-3,1);
+    idd_i.y = lowpass(idd_i.y,5e-3,1); % filter at 5e-3, actual bandwidth is 1e-3, so all good. 
 
     % ---- Arrays to store simulation data: ----
     ydata = [];
@@ -106,6 +107,7 @@ if identification
         FDSID_settings.T0 = T0;
         FDSID_settings.Ts = idd_i.Ts; 
         [sys_FDSID] = FDSID(idd_i, FDSID_settings);
+        
 
         save(strcat('./System_Identification/Models/fdsid_',file),'sys_FDSID');
     end
@@ -141,6 +143,7 @@ if identification
 
         % ---- Run GreyBox: ----
         [sys_GreyBox] = GreyBox(idd_i, Grey, GreyBox_settings);
+
 
         save(strcat('./System_Identification/Models/GreyBox_',file),'sys_GreyBox');
     end
@@ -271,7 +274,7 @@ if Validation
             sys = eval(strcat('sys_',method));  % identified model
             Sim = eval(strcat(method,'_Sim'));  % Simulation result
 
-            [fit] = analysePerformance(sys, idd_v, Sim);   % get validation results
+            [fit] = analysePerformance(sys, idd_v, Sim, makeFigure);   % get validation results
 
             if makeFigure
                 makefigure(method, Sim, idd_v, tdata, fit);    % make plot

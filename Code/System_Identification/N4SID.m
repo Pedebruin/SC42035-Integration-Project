@@ -42,7 +42,7 @@ switch settings.system(end)
                     'InitialState','estimate',...
                     'OutputOffset',T0(1),...
                     'Display','on',...
-                    'N4Horizon',[75 0 200]);
+                    'N4Horizon',[75 0 20]);
 
         % Run N4SID and ss estimation algorithm. 
         nk = delayest(data(:,1,1));
@@ -59,7 +59,7 @@ switch settings.system(end)
                     'InitialState','estimate',...
                     'OutputOffset',T0(2),...
                     'Display','on',...
-                    'N4Horizon',[75 0 200]);
+                    'N4Horizon',[75 0 20]);
         
         % Run N4SID and ss estimation algorithm. 
         nk = delayest(data(:,2,2));
@@ -74,14 +74,14 @@ switch settings.system(end)
                     'InitialState','estimate',...
                     'OutputOffset',T0,...
                     'Display','on',...
-                    'N4Horizon',[75 0 200]);
+                    'N4Horizon',[75 0 20]);
         
         % Run N4SID and ss estimation algorithm. 
         nk1 = delayest(data(:,1,1));
         nk2 = delayest(data(:,2,2));
        
-        [ss,x0] = ssest(data,min(Ped,nx),'InputDelay',[nk1 nk2],opt);      
- 
+        [ss,x0] = ssest(data,min(Ped,nx),'InputDelay',[nk1 nk2],opt);  
+        ss.UserData = T0;
 end
 end
 

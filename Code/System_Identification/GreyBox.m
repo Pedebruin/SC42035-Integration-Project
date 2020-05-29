@@ -139,4 +139,6 @@ warning('off','Ident:analysis:DataModelNameUnitMismatch')
 warning('off','Ident:analysis:DataModelIOReorder')
 
 sys = nlgreyest(data, nlgr, opt);
+sys.UserData = T0;
+
 end

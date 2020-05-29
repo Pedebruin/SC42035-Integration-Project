@@ -45,6 +45,8 @@ function [sys] = FDSID(idd, settings)
             g22 = tf([thetaHat2(3)], [1 thetaHat2(1)], settings.Ts, 'IODelay', d2);
             sys = [[g11 g12]; 
                    [g21 g22]];
+            sys.UserData = offset;
+
     end
     
 end
