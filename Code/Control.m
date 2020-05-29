@@ -27,22 +27,24 @@ load(fdsid_file.name)
 load(GreyBox_file.name)
 
 % ---- Get workable models: ----
-n4sid = pade(ss(sys_n4sid),1);
-fdsid = minreal(ss(sys_n4sid));
+n4sid = pade(ss(sys_n4sid),1); %Use pade approximation to convert ct ss with delay to ct ss without delay by adding more states.
+fdsid = pade(minreal(ss(d2c(sys_FDSID))));
 % still need to linearise the greybox model! 
 
 
+% % pole zero maps:
+% pzmap(n4sid)
+% pzmap(fdsid)
 
 
-
-G = n4sid;
-Wu = 1;
-Wt = 1;
-Wp = 1;
-
-P = [0 Wu;
-    0 G*Wu];
-    
+% G = n4sid;
+% Wu = 1;
+% Wt = 1;
+% Wp = 1;
+% 
+% P = [0 Wu;
+%     0 G*Wu];
+%     
 
 
 
