@@ -43,10 +43,7 @@ G = n4sid;
 
 % ---- Choose controller: ----
 controller_hinf = 0;
-controller_lqr = 0;
-
-% ---- Desired reference: ----
-rs = [-1;0;0;0;0];
+controller_lqr = 1;
 
 %% ==== CHECK PLANT PROPERTIES: ====
 
@@ -61,7 +58,9 @@ disp(string(Nr_unobservable_states) + ' unobservable states.');
 
 %% ==== LQR: ====
 if controller_lqr
-    LQR(G,rs);
+    rs = [50;20];
+    Plant = G;
+    LQR(Plant,rs);
 end
 
 %% ==== HINF: ====
