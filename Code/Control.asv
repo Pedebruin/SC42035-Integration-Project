@@ -52,17 +52,15 @@ rs = [-1;0;0;0;0];
 LQR(G,rs);
 
 %% ==== HINF: ====
+
 K = Hinf(G);
-
-
 if controller_hinf
     
-    simOut = sim('System','StartTime','0','StopTime',num2str(T));  
+        simOut = sim('System','StartTime','0','StopTime',num2str(T));  
     y = simOut.get('y') + T0';
     u = simOut.get('u');
     tdata = simOut.get('tout');
     Simulink.sdi.clear
-    
     % ---- Figure setup: ----
     fig = figure('Name','Control'); 
     sgtitle('Method: Hinf', 'Interpreter','latex');
