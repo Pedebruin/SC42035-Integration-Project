@@ -5,30 +5,26 @@ function LQR(G,r)
     %---- calculate L (make A - LC Hurwitz): ----
     L = ones(5,2)*0.01;
     ALC_hurwitz = sysd.A - L*sysd.C; 
-    if not(all(abs(ALC_hurwitz(:)) < 1)) %Check if A - LC hurwitz, all values must be in the unit circle.
+    if not(all(abs(ALC_hurwitz(:)) < 1)) %Check if hurwitz, all values must be in the unit circle.
         error('A - LC is not Hurwitz! Adjust the gain L.')
     end
-    
     
     %---- calculate optimum F (using discrete LQR): ----
     Q = eye(length(sysd.A));
     R = eye(size(sysd.B,2));
     [F,S,P] = dlqr(sysd.A,sysd.B,Q,R); %F is gain, S is solution, P is eigenvalues of closedloop 
     
-    
     %---- calculate optimum G: ----
-    
-    % define performance equation z = Ctilde*x + Dtilde*u
-    Ctilde = sysd.C;
-    Dtilde = sysd.D;
-    
+    % define performance equation z = C_ x + D_ u
+    Ctilde = eye(length(sysd.A));
+    Dtilde = zeros(5,2);
     % solve tracking equation:
+    %T = linsolve([[sysd.A,sysd.B];[C_,D_]],[zeros(8,2);eye(2)]);
     T = linsolve([[sysd.A,sysd.B];[Ctilde,Dtilde]],[zeros(5,5);eye(5)]);
     Pi = T(1:5,:);
     Gamma = T(6:7,:);
     G = Gamma + F*Pi;
 
-    
     %% ==== Simulation: ====
     
     TimeSeries = 1:1:500;

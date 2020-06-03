@@ -51,13 +51,7 @@ rs = [-1;0;0;0;0];
 %% ==== CHECK PLANT PROPERTIES: ====
 
 % ---- Controllability: ----
-Nr_uncontrollable_states = length(G.A) - rank(ctrb(G.A,G.B));
-disp(string(Nr_uncontrollable_states) + ' uncontrollable states.');
-
-% ---- Observability: ----
-Nr_unobservable_states = length(G.C) - rank(obsv(G.A,G.C));
-disp(string(Nr_unobservable_states) + ' unobservable states.');
-
+uncontrollable_states = length(G.A) - rank(ctrb(G.A,G.B));
 
 %% ==== LQR: ====
 if controller_lqr
