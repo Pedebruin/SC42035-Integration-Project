@@ -67,7 +67,7 @@ end
 %% ==== HINF: ====
 if controller_hinf
     % ---- Set up generalised plant: ----
-    s= tf([1 0],1);
+    s = tf([1 0],1);
     bw = 7e-3*2*pi;         % Bandwidth for each output [rad/s]
     M_1 = 1.8;              % Upper bound for Hinf norm
     A_1 = 1e-4;             % Attenuation of low frequency disturbances  
