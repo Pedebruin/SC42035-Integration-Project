@@ -45,11 +45,23 @@ G = n4sid;
 controller_hinf = 1;
 controller_lqr = 0;
 
-% ---- Desired reference: ----
-rs = [-1;0;0;0;0];
+%% ==== CHECK PLANT PROPERTIES: ====
+
+% ---- Controllability: ----
+Nr_uncontrollable_states = length(G.A) - rank(ctrb(G.A,G.B));
+disp(string(Nr_uncontrollable_states) + ' uncontrollable states.');
+
+% ---- Observability: ----
+Nr_unobservable_states = length(G.C) - rank(obsv(G.A,G.C));
+disp(string(Nr_unobservable_states) + ' unobservable states.');
+
 
 %% ==== LQR: ====
-LQR(G,rs);
+if controller_lqr
+    rs = [50;20];
+    Plant = G;
+    LQR(Plant,rs);
+end
 
 %% ==== HINF: ====
 [K_Hinf, K_Musyn] = Hinf(G);
