@@ -42,8 +42,8 @@ G = n4sid;
 %G = fdsid;
 
 % ---- Choose controller: ----
-controller_hinf = 0;
-controller_lqr = 1;
+controller_hinf = 1;
+controller_lqr = 0;
 
 % ---- Desired reference: ----
 rs = [-1;0;0;0;0];
@@ -52,16 +52,25 @@ rs = [-1;0;0;0;0];
 LQR(G,rs);
 
 %% ==== HINF: ====
-K = Hinf(G);
-
+[K_Hinf, K_Musyn] = Hinf(G);
 
 if controller_hinf
+        % ---- Simulate system: ----
+    r = [45 37];                % Degree C
+    T = 500;                   % s
+
+    T0 = G.UserData;
+    R = (r - T0');
+    K = K_Hinf;
+
+    CL = feedback(K*G,tf(eye(2)));
     
     simOut = sim('System','StartTime','0','StopTime',num2str(T));  
     y = simOut.get('y') + T0';
     u = simOut.get('u');
     tdata = simOut.get('tout');
     Simulink.sdi.clear
+    
     
     % ---- Figure setup: ----
     fig = figure('Name','Control'); 
