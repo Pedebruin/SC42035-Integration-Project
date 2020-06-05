@@ -6,10 +6,10 @@ disp('Arduino initialisation complete.')
 %% ==== CONTROLLER SETUP: ====
 
 % ---- Accessing folders: ----
-addpath('System_Identification')
-addpath('Controller_Design')
-addpath('System_Identification/Models')
-addpath('Functions')
+addpath('..\System_Identification')
+addpath('..\Controller_Design')
+addpath('..\System_Identification\Models')
+addpath('..\Functions')
 
 % ---- Loading model: ----
 TypeModel = 'n4sid';
@@ -39,7 +39,7 @@ end
 
 % ---- Loading controller parameters: ----
 TypeController = 'lqr';
-Reference = [50;50];
+Reference = [50;30];
 
 switch TypeController
     case 'lqr'
@@ -56,7 +56,7 @@ end
 %% ==== TEST SETUP ==== 
 
 % ---- Signal shaping ----
-InitialRestTime  = 1;%min
+InitialRestTime  = 0;%min
 TestPeriod       = 10;%min
 
 LengthTest = (InitialRestTime + TestPeriod)*60;
@@ -149,10 +149,10 @@ if DoTest == 'y'
         hold on
         plot(time(1:i),H1Output(1:i),'r.','MarkerSize',10,'DisplayName','Output 1');
         plot(time(1:i),H2Output(1:i),'b.','MarkerSize',10,'DisplayName','Output 2');
-        plot(time(1:i),H1hatOutput(1:i),'r.-','MarkerSize',1,'DisplayName','Observer 1');
-        plot(time(1:i),H2hatOutput(1:i),'b.-','MarkerSize',1,'DisplayName','Observer 2');
+        plot(time(1:i),H1hatOutput(1:i),'r-.','MarkerSize',1,'DisplayName','Observer 1');
+        plot(time(1:i),H2hatOutput(1:i),'b-.','MarkerSize',1,'DisplayName','Observer 2');
         yline(Reference(1),'k--','DisplayName','Reference 1');
-        yline(Reference(2),'k.-','DisplayName','Reference 2');
+        yline(Reference(2),'k-.','DisplayName','Reference 2');
         ylabel('Temperature (degC)')
         legend('Location','NorthWest')
         
@@ -201,15 +201,18 @@ if DoTest == 'y'
                   'InputUnit', {'%';'%';'%';'%'});
 
     % ---- Exporting data: ----
+    RefString = sprintf('%.0f-' , Reference);
+    RefString = RefString(1:end-1);% strip final comma
+    
     Filename = string( ...
-        TypeController + ...
-        '_' + TypeModel + ...
-        '_Ref-' + Reference + ...
+        string(TypeController) + ...
+        '_' + string(TypeModel) + ...
+        '_ref-' + RefString + ...
         '_LEN' + string(LengthTest) + ...
         '_' + string(DateSerial) + ...
         '.mat');
 
-    save(Filename,'Experiment');
+    save(Filename,'Test');
 
     disp('Data saved.');
     load handel %Play success sound.
