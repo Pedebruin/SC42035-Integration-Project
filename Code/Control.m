@@ -58,9 +58,10 @@ disp(string(Nr_unobservable_states) + ' unobservable states.');
 
 %% ==== LQR: ====
 if controller_lqr
-    rs = [50;20];
+    r = [50;30];
     Plant = G;
-    LQR(Plant,rs);
+    LQRd(Plant,r);
+    %LQRc(Plant,r); % <- Does not work yet.
 end
 
 %% ==== HINF: ====
@@ -141,12 +142,12 @@ if controller_hinf
     ylim(ax21,[-1 101])
     xlabel(ax21,"Time in [s]")
     ylabel(ax21,"Input heater 1 in [\%]")
-    legend(ax21)
+
 
     title(ax22,"Input heater 2")
     plot(ax22,tdata,u(:,2), 'DisplayName', 'Heater 2')
     ylim(ax22,[-1 101])
     xlabel(ax22,"Time in [s]")
     ylabel(ax22,"Input heater 2 in [\%]")
-    legend(ax22)
+
 end
