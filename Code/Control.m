@@ -60,7 +60,7 @@ disp(string(Nr_unobservable_states) + ' unobservable states.');
 if controller_lqr
     r = [50;30];
     Plant = G;
-    LQRd(Plant,r);
+    LQRd(Plant,r,'makeSimulation',true);
     %LQRc(Plant,r); % <- Does not work yet.
 end
 

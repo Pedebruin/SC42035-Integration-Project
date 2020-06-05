@@ -1,6 +1,19 @@
-function LQRd(Plant,r)
+function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     %Calculate gains for discrete LQR controller and simulate.
     
+    %% ==== OPTIONAL ARGUMENTS: ====
+    % make it optional to make the simulation.
+    
+    makeSimulation = 0; %default value for makeFigure, if false, no simulation.
+    
+    p = inputParser;
+    addRequired(p,'Plant');
+    addRequired(p,'r');
+    addParameter(p,'makeSimulation',makeSimulation,@islogical);
+    
+    parse(p,Plant,r,varargin{:});
+    makeSimulation = p.Results.makeSimulation;
+
     %% ==== SETUP: ====
     %Convert G to discrete form:
     Ts = 1;
@@ -66,95 +79,96 @@ function LQRd(Plant,r)
     
     %% ==== Simulation: ====
     
-    TimeSeries = 1:1:1000;
-    x_k0 = [-100,0,0,0,0]';
-    xhat_k0 = [0,0,0,0,0]';
-    
-    umax = 100;%
-    umin = 0;%
-    
-    ySeries = zeros(2,length(TimeSeries));
-    yhatSeries = zeros(2,length(TimeSeries));
-    uSeries = zeros(2,length(TimeSeries));
-    
-    for i = TimeSeries
-        
-        % ---- Feedback: ----
-        %u_k0 = -F*xhat_k0 + G*r;
-        u_k0 = -F*(xhat_k0 - xref) + uref;
-        %Input saturation:
-        u_k0 = min(umax, max(umin, u_k0));
+    if makeSimulation
+        TimeSeries = 1:1:1000;
+        x_k0 = [-100,0,0,0,0]';
+        xhat_k0 = [0,0,0,0,0]';
 
-        % ---- Plant: ----
-        
-        %State equations:
-        x_k1 = sysd.A*x_k0 + sysd.B*u_k0;
+        umax = 100;%
+        umin = 0;%
 
-        %Output equations:
-        y_k0 = sysd.C*x_k0 + sysd.D*u_k0;
-        
-        %Performance equations:
-        z_k0 = Ctilde*x_k0 + Dtilde*u_k0;
-        
-        % ---- Observer: ----
-        yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
-        xhat_k1 = sysd.A*xhat_k0 + sysd.B*u_k0 + L*(y_k0 - yhat_k0);
-        
-        % ---- Loop management: ----
-        
-        %Record input & output:
-        ySeries(:,i) = y_k0;
-        yhatSeries(:,i) = yhat_k0;
-        uSeries(:,i) = u_k0;
-        
-        %Prepare next iteration:
-        x_k0 = x_k1;
-        xhat_k0 = xhat_k1;
+        ySeries = zeros(2,length(TimeSeries));
+        yhatSeries = zeros(2,length(TimeSeries));
+        uSeries = zeros(2,length(TimeSeries));
+
+        for i = TimeSeries
+
+            % ---- Feedback: ----
+            %u_k0 = -F*xhat_k0 + G*r;
+            u_k0 = -F*(xhat_k0 - xref) + uref;
+            %Input saturation:
+            u_k0 = min(umax, max(umin, u_k0));
+
+            % ---- Plant: ----
+
+            %State equations:
+            x_k1 = sysd.A*x_k0 + sysd.B*u_k0;
+
+            %Output equations:
+            y_k0 = sysd.C*x_k0 + sysd.D*u_k0;
+
+            %Performance equations:
+            z_k0 = Ctilde*x_k0 + Dtilde*u_k0;
+
+            % ---- Observer: ----
+            yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
+            xhat_k1 = sysd.A*xhat_k0 + sysd.B*u_k0 + L*(y_k0 - yhat_k0);
+
+            % ---- Loop management: ----
+
+            %Record input & output:
+            ySeries(:,i) = y_k0;
+            yhatSeries(:,i) = yhat_k0;
+            uSeries(:,i) = u_k0;
+
+            %Prepare next iteration:
+            x_k0 = x_k1;
+            xhat_k0 = xhat_k1;
+        end
+
+
+        %% ==== Figure: ====
+
+        fig = figure('Name','Control'); 
+        sgtitle('Method: LQR', 'Interpreter','latex');
+        ax11 = subplot(2,2,1);
+        ax12 = subplot(2,2,2);
+        ax21 = subplot(2,2,3);
+        ax22 = subplot(2,2,4);
+        hold(ax11, "on");
+        hold(ax12, "on");
+        hold(ax21, "on");
+        hold(ax22, "on");
+
+        title(ax11,'Output Heater 1')
+        plot(ax11, TimeSeries, ySeries(1,:), 'r-', 'DisplayName', 'Plant');
+        plot(ax11, TimeSeries, yhatSeries(1,:), 'b-', 'DisplayName', 'Observer');
+        yline(ax11, r(1,1),'k-.', 'DisplayName', 'Reference');
+        xlabel(ax11,"Time in [s]")
+        ylabel(ax11,"Sensor 1 tempererature in [C]")
+        legend(ax11, 'Location', 'east')
+
+        title(ax12,'Output Heater 2')
+        plot(ax12, TimeSeries, ySeries(2,:), 'r-', 'DisplayName', 'Plant');
+        plot(ax12, TimeSeries, yhatSeries(2,:), 'b-', 'DisplayName', 'Observer');
+        yline(ax12, r(2,1),'k-.', 'DisplayName', 'Reference');
+        xlabel(ax12,"Time in [s]")
+        ylabel(ax12,"Sensor 1 tempererature in [C]")
+        legend(ax12, 'Location', 'east') 
+
+        title(ax21,'Input Heater 1')
+        plot(ax21, TimeSeries, uSeries(1,:), 'm-');
+        ylim(ax21, [0 100]);
+        xlabel(ax21,"Time in [s]")
+        ylabel(ax21,"Input heater 1 in [\%]")
+
+
+        title(ax22,'Input Heater 2')
+        plot(ax22, TimeSeries, uSeries(2,:), 'm-');
+        ylim(ax22, [0 100]);
+        xlabel(ax22,"Time in [s]")
+        ylabel(ax22,"Input heater 2 in [\%]")
     end
-    
-    
-    %% ==== Figure: ====
-    
-    fig = figure('Name','Control'); 
-    sgtitle('Method: LQR', 'Interpreter','latex');
-    ax11 = subplot(2,2,1);
-    ax12 = subplot(2,2,2);
-    ax21 = subplot(2,2,3);
-    ax22 = subplot(2,2,4);
-    hold(ax11, "on");
-    hold(ax12, "on");
-    hold(ax21, "on");
-    hold(ax22, "on");
-    
-    title(ax11,'Output Heater 1')
-    plot(ax11, TimeSeries, ySeries(1,:), 'r-', 'DisplayName', 'Plant');
-    plot(ax11, TimeSeries, yhatSeries(1,:), 'b-', 'DisplayName', 'Observer');
-    yline(ax11, r(1,1),'k-.', 'DisplayName', 'Reference');
-    xlabel(ax11,"Time in [s]")
-    ylabel(ax11,"Sensor 1 tempererature in [C]")
-    legend(ax11, 'Location', 'east')
-
-    title(ax12,'Output Heater 2')
-    plot(ax12, TimeSeries, ySeries(2,:), 'r-', 'DisplayName', 'Plant');
-    plot(ax12, TimeSeries, yhatSeries(2,:), 'b-', 'DisplayName', 'Observer');
-    yline(ax12, r(2,1),'k-.', 'DisplayName', 'Reference');
-    xlabel(ax12,"Time in [s]")
-    ylabel(ax12,"Sensor 1 tempererature in [C]")
-    legend(ax12, 'Location', 'east') 
-
-    title(ax21,'Input Heater 1')
-    plot(ax21, TimeSeries, uSeries(1,:), 'm-');
-    ylim(ax21, [0 100]);
-    xlabel(ax21,"Time in [s]")
-    ylabel(ax21,"Input heater 1 in [\%]")
-
-
-    title(ax22,'Input Heater 2')
-    plot(ax22, TimeSeries, uSeries(2,:), 'm-');
-    ylim(ax22, [0 100]);
-    xlabel(ax22,"Time in [s]")
-    ylabel(ax22,"Input heater 2 in [\%]")
-
 end
 
 
