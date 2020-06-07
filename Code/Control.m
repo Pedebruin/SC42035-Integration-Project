@@ -56,7 +56,7 @@ Nr_unobservable_states = length(G.C) - rank(obsv(G.A,G.C));
 disp(string(Nr_unobservable_states) + ' unobservable states.');
 
 %% ==== SETTINGS: ==== 
-    rs = [50;40];
+    rs = [50;60];
         
     
 %% ==== LQR: ====

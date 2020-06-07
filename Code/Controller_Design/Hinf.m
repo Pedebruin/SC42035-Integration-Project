@@ -1,62 +1,41 @@
 function [K_Hinf, K_Musyn] = Hinf(G)
+% Outputs a discretised controller with sampling frequency of 1s for
+% Hinfinity controla nd Mu synthesis. 
+
 % ---- Set up generalised plant: ----
+    
     % Wp
-    s = tf([1 0],1);
-    bw = 7e-2*2*pi;         % Bandwidth for each output [rad/s]
-    M = 1.8;                % Upper bound for Hinf norm
-    A = 1e-4;               % Attenuation of low frequency disturbances  
-    W_p = (s/M + bw)/(s + bw*A);
-    Wp = [W_p 0; 0 W_p];            % ideal sensitivity function S
+    W_p = makeweight(1e5, [7e-2*(2*pi) db2mag(3)], 1); % Design it upside down!
+    Wp = [W_p 0; 0 W_p];            % ideal sensitivity function S   
     
-    Wp.InputName = {'v1', 'v2'};
-    Wp.Outputname = {'z31','z32'};
-    
-    % Wu
-    Wu = tf(eye(2));                % ideal control input signal U
-    Wu.InputName = {'Heater power 1','Heater power 2'};
-    Wu.OutputName = {'z11','z12'};
-        
     % Wt
-    bw = 7e-1*2*pi;         % Bandwidth for each output [rad/s]
-    M = 10e-3;              % Upper bound for Hinf norm
-    A = 1;                  % Attenuation of low frequency disturbances
-    W_t = (s/M + bw)/(s + bw*A);
-    Wt = [W_t 0; 0 W_t];                % ideal transfer function T
+    W_t = makeweight(1, [7e-4*(2*pi) db2mag(3)], db2mag(100)); %Design it upside down!
+    Wt = [W_t 0; 0 W_t];             % ideal transfer function T
     
-    Wt.InputName = {'Temperature 1', 'Temperature 2'};
-    Wt.OutputName = {'z21','z22'};
+    % ---- Compute hinf controller: ----  
+    P = augw(G,Wp,[],Wt);
     
-    SumR1 = sumblk('v1 = r1 - Temperature 1');
-    SumR2 = sumblk('v2 = r2 - Temperature 2');
-    Inputs = {'r1','r2'};
-    Outputs = {'z11','z12','z21','z22','z31','z32'};
+    [K_Hinf,~,~] = mixsyn(G, Wp, [], Wt); %Wp, Wu, Wt
+    % [K_musyn,~] = musyn(P,2,2); % Still not working..
     
-    %P1 = connect(G,Wp,Wu,Wt,SumR1,SumR2,Inputs,Outputs);
-    P2 = minreal([zeros(2) Wu;
-                zeros(2) Wt*G;
-                Wp -Wp*G;
-                eye(2) -G]);
-    
-    % ---- Compute hinf controller: ----        
-    ncont = 2; 
-    nmeas = 2; 
-    [K_Hinf,~] = hinfsyn(P2,nmeas,ncont);
-    % [K_Musyn,CLperf,info] = musyn(P1,nmeas,ncont,K_Hinf);
-    K_Musyn = 0;
+    CL = feedback(G*K_Hinf,tf(eye(2)));
+    Sens = feedback(tf(eye(2)),G*K_Hinf);
     
     K_Hinf = c2d(K_Hinf,1,'zoh');
+    K_Musyn = tf(eye(2));
     
     
-    
-    CL = feedback(K_Hinf*G,tf(eye(2)));
+    % ---- COmpute hinf controller2: ----
+
     
     figure()
-    bode(1/Wp);
+    bodemag(1/Wp,Sens,1/Wp*Sens);
     title('1/Wp, S');
+    legend('1/Wp','S','1/Wp*S');
     
     figure()
-    bode(1/Wt,CL,CL*Wt);
-    title('1/Wt, T');
-    legend('1/Wt','T','T*Wt');
+    bodemag(1/Wt,CL,1/Wt*CL);
+    title('Wt, T');
+    legend('Wt','T','T*Wt');
 end
 
