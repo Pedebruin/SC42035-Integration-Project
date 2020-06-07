@@ -41,7 +41,7 @@ function [K_Hinf, K_Musyn] = Hinf(G)
     ncont = 2; 
     nmeas = 2; 
     [K_Hinf,~,~] = hinfsyn(P2,nmeas,ncont);
-    % [K_Musyn,CLperf,info] = musyn(P1,nmeas,ncont,K_Hinf);
+    [K_Musyn,CLperf,info] = musyn(P1,nmeas,ncont,K_Hinf);
     K_Musyn = 0;
 end
 
