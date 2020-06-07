@@ -39,12 +39,11 @@ end
 
 % ---- Loading controller parameters: ----
 TypeController = 'lqr';
-Reference = [50;40];
 
 switch TypeController
     case 'lqr'
         disp('Controller chosen: LQR');
-        [L,F] = LQRd(sys,Reference); %gains + feedback parameters.
+        [L,F] = LQRd(sys,[0;0]); %gains + feedback parameters.
         xhat_k0 = [0,0,0,0,0]'; %observer initialisation.
     case 'hinf'
         disp('Controller chosen: HINF');
@@ -56,28 +55,57 @@ end
 %% ==== TEST SETUP ==== 
 
 % ---- Signal shaping ----
+TypeSignal       = 'step'; %Options: step, prbs
 InitialRestTime  = 1;%min
-TestPeriod       = 10;%min
+PeriodSignal     = 10;%min
+Multiplier       = 1;
 
-LengthTest = (InitialRestTime + TestPeriod)*60;
-disp('Length experiment: ' + string(LengthTest/60) + ' min');
+switch TypeSignal
+    case 'step'
+        H1Ref = [ 50, 40]; %reference signal without multiplier.
+        H2Ref = [ 40, 50]; %reference signal without multiplier.
+        
+        if length(H1Ref) ~= length(H2Ref)
+            error('Signal arrays H1Signal and H2Signal are not of same length.');
+        else
+            LengthTest = ((InitialRestTime + ...
+                PeriodSignal * length(H1Ref)) * 60) ...
+                * Multiplier;
+        end
+    case 'prbs'
+        Range = [0 50];         %make prbs go between 0% and 50% input.
+        MinNrUnchanged = 200;   %min nr. of steps the prbs does not change, should be > time constant.
+        Band = [0 1/MinNrUnchanged];
+        LengthTest = (InitialRestTime + PeriodSignal * Multiplier)*60;
+        
+        prbsSignal = idinput([LengthTest,2], 'prbs', Band, Range); % prbs signal for 2 channels without multiplier.
+        H1Ref = prbsSignal(:,1)';
+        H2Ref = prbsSignal(:,2)'; 
+    otherwise
+        error('Not a valid signal type. Change TypeSignal variable.');
+end
 
 % ---- Preparing arrays ----
 H1Initial = 0;
 H2Initial = 0;
+H1Ref = repmat(H1Ref,1,Multiplier); %repeating the reference signals by the number set by multiplier.
+H2Ref = repmat(H2Ref,1,Multiplier); %repeating the reference signals by the number set by multiplier.
 
-H1Output    = zeros(1,LengthTest);
-H2Output    = zeros(1,LengthTest);
-H1hatOutput = zeros(1,LengthTest);
-H2hatOutput = zeros(1,LengthTest);
 H1Input     = zeros(1,LengthTest);
 H2Input     = zeros(1,LengthTest);
+H1Output    = zeros(1,LengthTest);
+H2Output    = zeros(1,LengthTest);
+
+H1RefInput  = zeros(1,LengthTest);
+H2RefInput  = zeros(1,LengthTest);
+H1hatOutput = zeros(1,LengthTest);
+H2hatOutput = zeros(1,LengthTest);
 
 time = linspace(1,LengthTest,LengthTest);
 
 
 %% ==== TEST RUNNER: ====
-
+disp('Length experiment: ' + string(LengthExperiment/60) + ' min');
 DoTest = input('Test good to go. Continue? (y/n) : ','s');
 
 if DoTest == 'y'
@@ -88,16 +116,32 @@ if DoTest == 'y'
         tic;
         textwaitbar(i,LengthTest,'Progress');
         
+        % ---- Check what reference to follow from list: ----
+        switch TypeSignal
+            case 'step'
+                currentPeriod = 1 + floor((i - (InitialRestTime*60))/(PeriodSignal*60)); %select current element in signal array.
+                if currentPeriod > length(H1Ref) %make that last step is still part of last period/element.
+                    currentPeriod = length(H1Ref);
+                end
+            case 'prbs'
+                currentPeriod = i - InitialRestTime * 60;
+        end
+
+        % ---- Activate Controller: ----
         switch TypeController
             case 'lqr'
-
                 % ---- Apply input: ----
                 if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
                     u_k0 = [H1Initial;H2Initial];
                 elseif i == max(InitialRestTime*60,10)
+                    oldPeriod = 0;
                     T0 = mean([H1Output(1:i),H2Output(1:i)]);
-                    [~,~,xref,uref] = LQRd(sys,Reference-T0); %calculate target.
                 else
+                    %Calculate Target:
+                    if oldPeriod ~= currentPeriod
+                        oldPeriod = currentPeriod;
+                        [~,~,xref,uref] = LQRd(sys,[H1Ref(oldPeriod);H2Ref(oldPeriod)]-T0); %calculate target.
+                    end
                     %Feedback:
                     u_k0 = -F*(xhat_k0 - xref) + uref;
                     u_k0 = min(100, max(0, u_k0)); %Input saturation.
@@ -134,9 +178,13 @@ if DoTest == 'y'
         if i <= (InitialRestTime*60) 
             H1Input(i) = H1Initial;       
             H2Input(i) = H2Initial;
+            H1RefInput(i) = H1Initial;       
+            H2RefInput(i) = H2Initial;
         else
             H1Input(i) = u_k0(1);       
             H2Input(i) = u_k0(2);
+            H1RefInput(i) = H1Ref(currentPeriod);       
+            H2RefInput(i) = H2Ref(currentPeriod);
         end
         H1Output(i) = t1;                  
         H2Output(i) = t2;
@@ -153,8 +201,8 @@ if DoTest == 'y'
         plot(time(1:i),H2Output(1:i),'b.','MarkerSize',10,'DisplayName','Output 2');
         plot(time(1:i),H1hatOutput(1:i),'r-','MarkerSize',1,'DisplayName','Observer 1');
         plot(time(1:i),H2hatOutput(1:i),'b-','MarkerSize',1,'DisplayName','Observer 2');
-        yline(Reference(1),'k--','DisplayName','Reference 1');
-        yline(Reference(2),'k-.','DisplayName','Reference 2');
+        plot(time(1:i),H1RefInput(1:i),'m-','DisplayName','Reference 1');
+        plot(time(1:i),H2RefInput(1:i),'c-','DisplayName','Reference 2');
         ylabel('Temperature (degC)')
         legend('Location','NorthWest')
         
@@ -188,32 +236,66 @@ if DoTest == 'y'
     
     Test.TypeController = TypeController;
     Test.TypeModel = TypeModel;
+    Test.TypeSignal = TypeSignal;
     Test.InitialRestTime = InitialRestTime;
-    Test.TestPeriod = TestPeriod;
-    Test.Reference = Reference;
+    Test.PeriodSignal = PeriodSignal;
+    Test.Multiplier = Multiplier;
+    Test.H1Ref = H1Ref;
+    Test.H2Ref = H2Ref;
     Test.H1Initial = H1Initial;
     Test.H2Initial = H2Initial;
     Test.LengthExperiment = LengthTest;
     
+    if strcmp(TypeSignal,'prbs') %added fields if prbs signal.
+        Test.Range = Range;
+        Test.MinNrUnchanged = MinNrUnchanged;
+        Test.Band = Band;
+    end
+    
     Test.idd = iddata([H1Output', H2Output',H1hatOutput',H2hatOutput'],...
-                  [H1Input', H2Input',H1Input', H2Input'], 1,...
+                  [H1Input', H2Input',H1RefInput', H2RefInput'], 1,...
                   'OutputName', {'Temperature 1'; 'Temperature 2'; 'Observer 1'; 'Observer 2'},...
                   'OutputUnit', {'Degree C'; 'Degree C'; 'Degree C'; 'Degree C'},...
-                  'InputName', {'Heater power 1'; 'Heater power 2'; 'Heater (obs.) power 1'; 'Heater (obs.) power 2'},...
+                  'InputName', {'Heater power 1'; 'Heater power 2'; 'Heater reference 1'; 'Heater reference 2'},...
                   'InputUnit', {'%';'%';'%';'%'});
 
     % ---- Exporting data: ----
-    RefString = sprintf('%.0f-' , Reference);
-    RefString = RefString(1:end-1);% strip final comma
     
-    Filename = string( ...
-        string(TypeController) + ...
-        '_' + string(TypeModel) + ...
-        '_ref-' + RefString + ...
-        '_LEN' + string(LengthTest) + ...
-        '_' + string(DateSerial) + ...
-        '.mat');
-
+    switch TypeSignal
+        case 'step'
+            H1RefString = sprintf('%.0f-' , H1Ref);
+            H1RefString = H1RefString(1:end-1);% strip final comma
+            H2RefString = sprintf('%.0f-' , H2Ref);
+            H2RefString = H2RefString(1:end-1);% strip final comma
+            
+            Filename = string( ...
+                string(TypeController) + ...
+                '_' + string(TypeModel) + ...
+                '_' + string(TypeSignal) + ...
+                '_R1-' + H1RefString + ...
+                '_R2-' + H2RefString + ...
+                '_MLT' + string(Multiplier) + ...
+                '_LEN' + string(LengthTest) + ...
+                '_' + string(DateSerial) + ...
+                '.mat');
+            
+        case 'prbs'
+            RangeString = sprintf('%.0f-' , Range);
+            MinString = sprintf('%.0f-' , MinNrUnchanged);
+            
+            Filename = string( ...
+                string(TypeController) + ...
+                '_' + string(TypeModel) + ...
+                '_' + string(TypeSignal) + ...
+                '_Range' + RangeString(1:end-1) + ...
+                '_Min' + MinString(1:end-1) + ...
+                '_MLT' + string(Multiplier) + ...
+                '_LEN' + string(LengthTest) + ...
+                '_' + string(DateSerial) + ...
+                '.mat');
+        
+    end     
+    
     save(Filename,'Test');
 
     disp('Data saved.');
