@@ -47,7 +47,8 @@ switch TypeController
         xhat_k0 = [0,0,0,0,0]'; %observer initialisation.
     case 'hinf'
         disp('Controller chosen: HINF');
-        error('HINF not ready yet.');
+        [K_Hinf, K_Musyn] = Hinf(sys);      % Get controller!
+        xHinf_k0 = zeros(order(K_Hinf),1);  % Initialise controller at 0.
     otherwise
         error('Unknown controller. Insert valid name.');
 end
@@ -160,8 +161,26 @@ if DoTest == 'y'
 
                 % ---- Prepare next iteration: ----
                 xhat_k0 = xhat_k1;
+                
             case 'hinf'
-                error('HINF controller not finished yet. Cannot give feedback.');
+                % do same stuff as above
+                if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
+                    u_k0 = [H1Initial;H2Initial];
+                elseif i == max(InitialRestTime*60,10)
+                    oldPeriod = 0;
+                    T0 = mean([H1Output(1:i),H2Output(1:i)]); 
+                else 
+                    if oldPeriod ~= currentPeriod
+                        oldPeriod = currentPeriod;
+                        r = [H1Ref(oldPeriod); H2Ref(oldPeriod)]-T0;
+                    end
+                    % Feedback:
+                    xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(y_k0 - r); % Simulate the dynamic controller, can also use yhat_k0
+                    yHinf_k1 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(y_k0 - r); 
+                    
+                    u_k0 = yHinf_k1;
+                    u_k0 = min(100, max(0, u_k0)); %Input saturation.
+                end
         end
             
 
