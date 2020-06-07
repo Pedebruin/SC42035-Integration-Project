@@ -2,7 +2,7 @@ close all; clear all; clc
 beep on; %Enable warning sounds.
 
 tclab; % include tclab.m for initialization, also includes commands to control arduino.
-disp('Experiment Runner ready.')
+disp('Arduino initialisation complete.')
 
 %% ==== EXPERIMENT SETUP ==== 
 
@@ -106,8 +106,8 @@ if DoExperiment == 'y'
 
         % ---- Insert input and output into data vectors: ----
         if i <= (InitialRestTime*60) 
-            H1Input(i) = 0;       
-            H2Input(i) = 0;
+            H1Input(i) = H1Initial;       
+            H2Input(i) = H2Initial;
         else
             H1Input(i) = H1Signal(currentPeriod);       
             H2Input(i) = H2Signal(currentPeriod);
