@@ -42,8 +42,8 @@ G = n4sid;
 %G = fdsid;
 
 % ---- Choose controller: ----
-controller_hinf = 1;
-controller_lqr = 0;
+controller_hinf = 0;
+controller_lqr = 1;
 
 %% ==== CHECK PLANT PROPERTIES: ====
 
@@ -55,14 +55,15 @@ disp(string(Nr_uncontrollable_states) + ' uncontrollable states.');
 Nr_unobservable_states = length(G.C) - rank(obsv(G.A,G.C));
 disp(string(Nr_unobservable_states) + ' unobservable states.');
 
+
 %% ==== SETTINGS: ==== 
     rs = [50;60];
-        
-    
+
 %% ==== LQR: ====
 if controller_lqr
+    r = [50;40];
     Plant = G;
-    LQR(Plant,rs);
+    LQRd(Plant,r,'makeSimulation',true);
 end
 
 %% ==== HINF: ====

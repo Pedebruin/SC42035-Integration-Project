@@ -25,8 +25,8 @@ switch TypeModel
         disp('Model chosen: fdsid');
         fdsid_file = dir('..\System_Identification\Models\FINAL\fdsid*.mat');
         load(fdsid_file.name);
-        sysd = pade(minreal(ss(sys_FDSID)));
-        sys = d2c(sysd);
+        sysd = ss(sys_FDSID);
+        sys = pade(d2c(minreal(ss(sys_FDSID))));
     case 'greybox'
         disp('Model chosen: greybox');
         GreyBox_file = dir('..\System_Identification\Models\FINAL\GreyBox*.mat');
@@ -57,7 +57,7 @@ end
 % ---- Signal shaping ----
 TypeSignal       = 'step'; %Options: step, prbs
 InitialRestTime  = 1;%min
-PeriodSignal     = 10;%min
+PeriodSignal     = 5;%min
 Multiplier       = 1;
 
 switch TypeSignal
@@ -105,7 +105,7 @@ time = linspace(1,LengthTest,LengthTest);
 
 
 %% ==== TEST RUNNER: ====
-disp('Length experiment: ' + string(LengthExperiment/60) + ' min');
+disp('Length test: ' + string(LengthTest/60) + ' min');
 DoTest = input('Test good to go. Continue? (y/n) : ','s');
 
 if DoTest == 'y'
