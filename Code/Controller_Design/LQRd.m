@@ -20,11 +20,6 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     sysd = c2d(Plant, Ts);
     
     % ---- calculate L (make A - LC Hurwitz): ----
-    %L = ones(5,2)*-0.01;
-    %Using the following command improves L: 
-    %>>> [L,prec,message] = place(sysd.A',sysd.C',[0.96, 0.99, 0.98, 0.92, 0.51]');
-%     L = [    0.0707   -0.1467    0.0527   -0.0008    2.9859;
-%             -0.0602    0.0282    0.0435    0.0021    0.8821]';
     [L,prec,message] = place(sysd.A',sysd.C',eig(sysd.A) - 0.06);
     L = L';
     ALC_hurwitz = eig(sysd.A - L*sysd.C); 
@@ -49,21 +44,6 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     [F,S,P] = dlqr(sysd.A,sysd.B,Q,R); %F is gain, S is solution, P is eigenvalues of closedloop 
 
     
-%     % ---- calculate optimum G: ----
-%     
-%     % define performance equation z = Ctilde*x + Dtilde*u
-%     Ctilde = sysd.C;
-%     Dtilde = sysd.D;
-%     
-%     % solve tracking equation:
-%     T = linsolve([[sysd.A,sysd.B];
-%                   [Ctilde,Dtilde]], ...
-%                   [zeros(5,2);
-%                    eye(2)]);
-%     Pi = T(1:5,:);
-%     Gamma = T(6:7,:);
-%     G = Gamma + F*Pi;
-
     % ---- Calculate target: ----
     % define performance equation z = Ctilde*x + Dtilde*u
     Ctilde = sysd.C;
@@ -94,7 +74,6 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
         for i = TimeSeries
 
             % ---- Feedback: ----
-            %u_k0 = -F*xhat_k0 + G*r;
             u_k0 = -F*(xhat_k0 - xref) + uref;
             %Input saturation:
             u_k0 = min(umax, max(umin, u_k0));
@@ -107,8 +86,8 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
             %Output equations:
             y_k0 = sysd.C*x_k0 + sysd.D*u_k0;
 
-            %Performance equations:
-            z_k0 = Ctilde*x_k0 + Dtilde*u_k0;
+%             %Performance equations:
+%             z_k0 = Ctilde*x_k0 + Dtilde*u_k0;
 
             % ---- Observer: ----
             yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
