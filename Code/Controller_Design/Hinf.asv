@@ -40,11 +40,11 @@ function [K_Hinf, K_Musyn] = Hinf(G)
     % ---- Compute hinf controller: ----        
     ncont = 2; 
     nmeas = 2; 
-    [K_Hinf,~] = hinfsyn(P2,nmeas,ncont);
+    [K_Hinf,~] = sdhinfsyn(P2,nmeas,ncont);
     % [K_Musyn,CLperf,info] = musyn(P1,nmeas,ncont,K_Hinf);
     K_Musyn = 0;
     
-    K_Hinf = c2d(K_Hinf,1,'zoh');
+    
     
     
     

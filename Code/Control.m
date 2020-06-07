@@ -55,28 +55,30 @@ disp(string(Nr_uncontrollable_states) + ' uncontrollable states.');
 Nr_unobservable_states = length(G.C) - rank(obsv(G.A,G.C));
 disp(string(Nr_unobservable_states) + ' unobservable states.');
 
-
+%% ==== SETTINGS: ==== 
+    rs = [50;40];
+        
+    
 %% ==== LQR: ====
 if controller_lqr
-    r = [50;30];
     Plant = G;
-    LQRd(Plant,r,'makeSimulation',true);
-    %LQRc(Plant,r); % <- Does not work yet.
+    LQR(Plant,rs);
 end
 
 %% ==== HINF: ====
-[K_Hinf, K_Musyn] = Hinf(G);
-
 if controller_hinf
+    % Can still use the continuous time system. The command used is
+    % sdhinfsyn, which samples the system itself. So the controller is
+    % still a discrete time controller K. 
+    [K_Hinf, K_Musyn] = Hinf(G);
+    
         % ---- Simulate system: ----
-    r = [45 37];                % Degree C
-    T = 500;                   % s
-
+    T = 500;  % s
+    Gd = c2d(G,1,'zoh');
+    
     T0 = G.UserData;
-    R = (r - T0');
+    R = (rs' - T0');
     K = K_Hinf;
-
-    CL = feedback(K*G,tf(eye(2)));
     
     simOut = sim('System','StartTime','0','StopTime',num2str(T));  
     y = simOut.get('y') + T0';
@@ -99,32 +101,32 @@ if controller_hinf
 
     % ---- Plots: ----
     title(ax11,'Output Heater 1')
-    plot(ax11,tdata,y(:,1), 'DisplayName', 'Hinf')
-    yline(ax11,r(1),'--')
+    stairs(ax11,tdata,y(:,1), 'DisplayName', 'Hinf')
+    yline(ax11,rs(1),'--')
     ylim(ax11,[-1 101])
     xlabel(ax11,"Time in [s]")
     ylabel(ax11,"Sensor 1 tempererature in [C]")
     legend(ax11, 'Location', 'northeast')
 
     title(ax12,'output Heater 2')
-    plot(ax12,tdata,y(:,2), 'DisplayName', 'Hinf')
+    stairs(ax12,tdata,y(:,2), 'DisplayName', 'Hinf')
     ylim(ax12,[-1 101])
-    yline(ax12,r(2),'--')
+    yline(ax12,rs(2),'--')
     xlabel(ax12,"Time in [s]")
     ylabel(ax12,"Sensor 1 tempererature in [C]")
     legend(ax12, 'Location', 'northeast')            
 
     title(ax21,"Input heater 1")
-    plot(ax21,tdata,u(:,1), 'DisplayName', 'Heater 1')
+    stairs(ax21,tdata,u(:,1), 'DisplayName', 'Heater 1')
     ylim(ax21,[-1 101])
     xlabel(ax21,"Time in [s]")
     ylabel(ax21,"Input heater 1 in [\%]")
-
+    legend(ax21)
 
     title(ax22,"Input heater 2")
-    plot(ax22,tdata,u(:,2), 'DisplayName', 'Heater 2')
+    stairs(ax22,tdata,u(:,2), 'DisplayName', 'Heater 2')
     ylim(ax22,[-1 101])
     xlabel(ax22,"Time in [s]")
     ylabel(ax22,"Input heater 2 in [\%]")
-
+    legend(ax22)
 end
