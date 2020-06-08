@@ -20,7 +20,7 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     sysd = c2d(Plant, Ts);
     
     % ---- calculate L (make A - LC Hurwitz): ----
-    [L,prec,message] = place(sysd.A',sysd.C',eig(sysd.A) - 0.06);
+    L = place(sysd.A',sysd.C',eig(sysd.A) - 0.06);
     L = L';
     ALC_hurwitz = eig(sysd.A - L*sysd.C); 
     if not(all(abs(ALC_hurwitz(:)) < 1)) %Check if A - LC hurwitz, all values must be in the unit circle.
@@ -39,10 +39,10 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     
     
     % ---- calculate optimum F (using discrete LQR): ----
-    Q = eye(length(sysd.A));
+    Q = diag([1,1,1,0,0]);%eye(length(sysd.A));
     R = eye(size(sysd.B,2))*0;
     [F,S,P] = dlqr(sysd.A,sysd.B,Q,R); %F is gain, S is solution, P is eigenvalues of closedloop 
-
+%     F = place(sysd.A,sysd.B,eig(sysd.A) - 0.06);
     
     % ---- Calculate target: ----
     % define performance equation z = Ctilde*x + Dtilde*u
