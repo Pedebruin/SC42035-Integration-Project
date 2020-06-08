@@ -170,28 +170,27 @@ if DoTest == 'y'
                 if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
                     u_k0 = [H1Initial;H2Initial];
                     r = [H1Initial;H2Initial];
-                    yHinf_k0 = [0;0];
                 elseif i == max(InitialRestTime*60,10)
                     oldPeriod = 0;
                     T0 = mean([H1Output(1:i),H2Output(1:i)]); 
                 else 
                     if oldPeriod ~= currentPeriod
                         oldPeriod = currentPeriod;
-                        r = [H1Ref(oldPeriod); H2Ref(oldPeriod)];
+                        r = [H1Ref(oldPeriod); H2Ref(oldPeriod)]-T0;
                     end
                     % ---- Hinf state space: ----
-                    xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(r - y_k0); % Simulate the dynamic controller, can also use yhat_k0
-                    yHinf_k0 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(r - y_k0); 
+                    xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(y_k0 - r); % Simulate the dynamic controller, can also use yhat_k0
+                    yHinf_k0 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(y_k0 - r); 
                     
                     % Feedback:
                     u_k0 = yHinf_k0;
                     u_k0 = min(100, max(0, u_k0)); %Input saturation.
-                    
-                    % ---- Prepare next iteration: ----
-                    xHinf_k0 = xHinf_k1;
                 end
                 h1(u_k0(1));
                 h2(u_k0(2));
+                
+                % ---- Prepare next iteration: ----
+                xHinf_k0 = xHinf_k1;
         end
             
 
@@ -226,8 +225,8 @@ if DoTest == 'y'
                 H1hatOutput(i) = yhat_k0(1);
                 H2hatOutput(i) = yhat_k0(2);
             case 'hinf'
-                H1hatOutput(i) = yHinf_k0(1);
-                H2hatOutput(i) = yHinf_k0(2);
+                H1hatOutput(i) = yHinf_k1(1);
+                H2hatOutput(i) = yHinf_k1(2);
         end
         
         
