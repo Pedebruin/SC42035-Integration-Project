@@ -38,7 +38,7 @@ end
 
 
 % ---- Loading controller parameters: ----
-TypeController = 'lqr';
+TypeController = 'hinf';
 
 switch TypeController
     case 'lqr'
@@ -117,6 +117,13 @@ if DoTest == 'y'
         tic;
         textwaitbar(i,LengthTest,'Progress');
         
+        
+        % ---- Read temperatures: ----
+        t1 = T1C();
+        t2 = T2C();
+        y_k0 = [t1;t2];
+        
+        
         % ---- Check what reference to follow from list: ----
         switch TypeSignal
             case 'step'
@@ -128,6 +135,7 @@ if DoTest == 'y'
                 currentPeriod = i - InitialRestTime * 60;
         end
 
+        
         % ---- Activate Controller: ----
         switch TypeController
             case 'lqr'
@@ -150,11 +158,6 @@ if DoTest == 'y'
                 h1(u_k0(1));
                 h2(u_k0(2));
 
-                % ---- Read temperatures: ----
-                t1 = T1C();
-                t2 = T2C();
-                y_k0 = [t1;t2];
-
                 % ---- Observer: ----
                 yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
                 xhat_k1 = sysd.A*xhat_k0 + sysd.B*u_k0 + L*(y_k0 - yhat_k0);
@@ -166,6 +169,7 @@ if DoTest == 'y'
                 % do same stuff as above
                 if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
                     u_k0 = [H1Initial;H2Initial];
+                    r = [H1Initial;H2Initial];
                 elseif i == max(InitialRestTime*60,10)
                     oldPeriod = 0;
                     T0 = mean([H1Output(1:i),H2Output(1:i)]); 
@@ -175,12 +179,18 @@ if DoTest == 'y'
                         r = [H1Ref(oldPeriod); H2Ref(oldPeriod)]-T0;
                     end
                     % Feedback:
-                    xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(y_k0 - r); % Simulate the dynamic controller, can also use yhat_k0
-                    yHinf_k1 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(y_k0 - r); 
-                    
                     u_k0 = yHinf_k1;
                     u_k0 = min(100, max(0, u_k0)); %Input saturation.
                 end
+                h1(u_k0(1));
+                h2(u_k0(2));
+                
+                % ---- Hinf state space: ----
+                xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(y_k0 - r); % Simulate the dynamic controller, can also use yhat_k0
+                yHinf_k1 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(y_k0 - r); 
+                
+                % ---- Prepare next iteration: ----
+                xHinf_k0 = xHinf_k1;
         end
             
 
@@ -193,6 +203,7 @@ if DoTest == 'y'
         brightness = max(0,min(1,brightness)); % limit 0-1
         led(brightness);
 
+        
         % ---- Insert input and output into data vectors: ----
         if i <= (InitialRestTime*60) 
             H1Input(i) = H1Initial;       
@@ -205,10 +216,19 @@ if DoTest == 'y'
             H1RefInput(i) = H1Ref(currentPeriod);       
             H2RefInput(i) = H2Ref(currentPeriod);
         end
+        
         H1Output(i) = t1;                  
         H2Output(i) = t2;
-        H1hatOutput(i) = yhat_k0(1);
-        H2hatOutput(i) = yhat_k0(2);
+        
+        switch TypeController
+            case 'lqr'
+                H1hatOutput(i) = yhat_k0(1);
+                H2hatOutput(i) = yhat_k0(2);
+            case 'hinf'
+                H1hatOutput(i) = yHinf_k1(1);
+                H2hatOutput(i) = yHinf_k1(2);
+        end
+        
         
         % ---- Figure of results so far: ----
 
