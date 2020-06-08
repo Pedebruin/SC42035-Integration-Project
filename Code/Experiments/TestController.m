@@ -38,7 +38,7 @@ end
 
 
 % ---- Loading controller parameters: ----
-TypeController = 'hinf';
+TypeController = 'lqr';
 
 switch TypeController
     case 'lqr'
@@ -135,7 +135,7 @@ if DoTest == 'y'
                 currentPeriod = i - InitialRestTime * 60;
         end
 
-        
+
         % ---- Activate Controller: ----
         switch TypeController
             case 'lqr'
@@ -144,27 +144,30 @@ if DoTest == 'y'
                     u_k0 = [H1Initial;H2Initial];
                 elseif i == max(InitialRestTime*60,10)
                     oldPeriod = 0;
-                    T0 = mean([H1Output(1:i),H2Output(1:i)]);
+                    T0 = 0;%mean([H1Output(1:i),H2Output(1:i)]); Don't need this!!!
                 else
                     %Calculate Target:
                     if oldPeriod ~= currentPeriod
                         oldPeriod = currentPeriod;
                         [~,~,xref,uref] = LQRd(sys,[H1Ref(oldPeriod);H2Ref(oldPeriod)]-T0); %calculate target.
                     end
-                    %Feedback:
+
+                    % ---- Feedback: ----
                     u_k0 = -F*(xhat_k0 - xref) + uref;
                     u_k0 = min(100, max(0, u_k0)); %Input saturation.
                 end
-                h1(u_k0(1));
-                h2(u_k0(2));
-
+                
                 % ---- Observer: ----
                 yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
                 xhat_k1 = sysd.A*xhat_k0 + sysd.B*u_k0 + L*(y_k0 - yhat_k0);
-
+                
                 % ---- Prepare next iteration: ----
                 xhat_k0 = xhat_k1;
                 
+                % ---- Apply input: ----
+                h1(u_k0(1));
+                h2(u_k0(2));
+
             case 'hinf'
                 % do same stuff as above
                 if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
@@ -183,17 +186,18 @@ if DoTest == 'y'
                     xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(r - y_k0); % Simulate the dynamic controller, can also use yhat_k0
                     yHinf_k0 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(r - y_k0); 
                     
-                    % Feedback:
+                    % ---- Feedback: ----
                     u_k0 = yHinf_k0;
                     u_k0 = min(100, max(0, u_k0)); %Input saturation.
                     
                     % ---- Prepare next iteration: ----
                     xHinf_k0 = xHinf_k1;
                 end
+                % ---- Apply input: ----
                 h1(u_k0(1));
                 h2(u_k0(2));
         end
-            
+        
 
         % ---- LED brightness for safety: ----
         % The LED will turn on at >30degC, and increase the brightness the
@@ -239,8 +243,10 @@ if DoTest == 'y'
         hold on
         plot(time(1:i),H1Output(1:i),'r.','MarkerSize',10,'DisplayName','Output 1');
         plot(time(1:i),H2Output(1:i),'b.','MarkerSize',10,'DisplayName','Output 2');
-        plot(time(1:i),H1hatOutput(1:i),'r-','MarkerSize',1,'DisplayName','Observer 1');
-        plot(time(1:i),H2hatOutput(1:i),'b-','MarkerSize',1,'DisplayName','Observer 2');
+        if strcmp(TypeController,'lqr')
+            plot(time(1:i),H1hatOutput(1:i),'r-','MarkerSize',1,'DisplayName','Observer 1');
+            plot(time(1:i),H2hatOutput(1:i),'b-','MarkerSize',1,'DisplayName','Observer 2');
+        end
         plot(time(1:i),H1RefInput(1:i),'m-','DisplayName','Reference 1');
         plot(time(1:i),H2RefInput(1:i),'c-','DisplayName','Reference 2');
         ylabel('Temperature (degC)')
