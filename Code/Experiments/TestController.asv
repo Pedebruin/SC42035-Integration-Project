@@ -112,7 +112,7 @@ DoTest = input('Test good to go. Continue? (y/n) : ','s');
 if DoTest == 'y'
     
     figure(1) %figure to see experiment running.
-        
+    
     for i = 1:LengthTest
         tic;
         textwaitbar(i,LengthTest,'Progress');
@@ -238,31 +238,27 @@ if DoTest == 'y'
         % ---- Figure of results so far: ----
 
         clf %clear current window (for new update)
-        sgtitle('Type Controller: ' + string(upper(TypeController)),'Interpreter','latex');
        
-        subplot(2,1,1);
-        title('Outputs','Interpreter','latex');
-        hold on;
+        subplot(2,1,1)
+        hold on
         plot(time(1:i),H1Output(1:i),'r.','MarkerSize',10,'DisplayName','TCL output 1');
         plot(time(1:i),H2Output(1:i),'b.','MarkerSize',10,'DisplayName','TCL output 2');
         if strcmp(TypeController,'lqr')
-            plot(time(1:i),H1hatOutput(1:i),'r-','LineWidth',1,'DisplayName','Observer output 1');
-            plot(time(1:i),H2hatOutput(1:i),'b-','LineWidth',1,'DisplayName','Observer output 2');
+            plot(time(1:i),H1hatOutput(1:i),'r-','MarkerSize',1,'DisplayName','Observer output 1');
+            plot(time(1:i),H2hatOutput(1:i),'b-','MarkerSize',1,'DisplayName','Observer 2');
         end
-        plot(time(1:i),H1RefInput(1:i),'m-','LineWidth',1,'DisplayName','Reference 1');
-        plot(time(1:i),H2RefInput(1:i),'c-','LineWidth',1,'DisplayName','Reference 2');
-        ylabel('Temperature in [C]','Interpreter','latex');
-        xlabel('Time in [s]','Interpreter','latex');
-        legend('Location','SouthEast');
+        plot(time(1:i),H1RefInput(1:i),'m-','DisplayName','Reference 1');
+        plot(time(1:i),H2RefInput(1:i),'c-','DisplayName','Reference 2');
+        ylabel('Temperature (degC)')
+        legend('Location','NorthWest')
         
-        subplot(2,1,2);
-        title('Inputs','Interpreter','latex');
-        hold on;
+        subplot(2,1,2)
+        hold on
         plot(time(1:i),H1Input(1:i),'r-','LineWidth',2,'DisplayName','Input 1');
         plot(time(1:i),H2Input(1:i),'b-','LineWidth',2,'DisplayName','Input 2');
-        ylabel('Applied input in [\%]','Interpreter','latex');
-        xlabel('Time in [s]','Interpreter','latex');
-        legend('Location','NorthEast');
+        ylabel('Heater (0-5.5 V)')
+        xlabel('Time (sec)')
+        legend('Location','NorthWest')
         
         drawnow;
         t = toc;

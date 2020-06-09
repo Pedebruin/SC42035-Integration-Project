@@ -119,21 +119,25 @@ if DoExperiment == 'y'
         % ---- Figure of results so far: ----
 
         clf %clear current window (for new update)
+        sgtitle('Type Signal: ' + string(upper(TypeSignal)),'Interpreter','latex');
        
         subplot(2,1,1)
+        title('Outputs','Interpreter','latex');
         plot(time(1:i),H1Output(1:i),'r.','MarkerSize',10);
         hold on
         plot(time(1:i),H2Output(1:i),'b.','MarkerSize',10);
-        ylabel('Temperature (degC)')
-        legend('Temperature 1','Temperature 2','Location','NorthWest')
+        ylabel('Temperature in [C]','Interpreter','latex');
+        xlabel('Time in [s]','Interpreter','latex');
+        legend('Output 1','Output 2','Location','SouthEast')
         
         subplot(2,1,2)
+        title('Inputs','Interpreter','latex');
         plot(time(1:i),H1Input(1:i),'r-','LineWidth',2);
         hold on
         plot(time(1:i),H2Input(1:i),'b--','LineWidth',2);
-        ylabel('Heater (0-5.5 V)')
-        xlabel('Time (sec)')
-        legend('Heater 1','Heater 2','Location','NorthWest')
+        ylabel('Applied input in [\%]','Interpreter','latex');
+        xlabel('Time in [s]','Interpreter','latex');
+        legend('Input 1','Input 2','Location','NorthEast')
         
         drawnow;
         t = toc;
