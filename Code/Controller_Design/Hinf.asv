@@ -28,17 +28,17 @@ function [K_Hinf, K_Musyn] = Hinf(G)
    
     % figure
     makefigure = false;
-    
     if makefigure
-        figure()
-        bodemag(1/Wp,Sens,Wp*Sens);
-        title('1/Wp, S');
-        legend('1/Wp','S','S*Wp');
-
-        figure()
-        bodemag(1/Wt,CL,Wt*CL);
-        title('Wt, T');
-        legend('Wt','T','T*Wt');
+    
+    figure()
+    bodemag(1/Wp,Sens,Wp*Sens);
+    title('1/Wp, S');
+    legend('1/Wp','S','S*Wp');
+    
+    figure()
+    bodemag(1/Wt,CL,Wt*CL);
+    title('Wt, T');
+    legend('Wt','T','T*Wt');
     end
 end
 
