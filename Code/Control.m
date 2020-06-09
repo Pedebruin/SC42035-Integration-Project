@@ -57,7 +57,7 @@ disp(string(Nr_unobservable_states) + ' unobservable states.');
 
 
 %% ==== SETTINGS: ==== 
-    rs = [50;60];
+    rs = [45;38];
 
 %% ==== LQR: ====
 if controller_lqr
