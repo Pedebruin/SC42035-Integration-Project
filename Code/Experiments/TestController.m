@@ -38,7 +38,7 @@ end
 
 
 % ---- Loading controller parameters: ----
-TypeController = 'lqr';
+TypeController = 'hinf';
 
 switch TypeController
     case 'lqr'
