@@ -43,12 +43,11 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     R = eye(size(sysd.B,2))*0;
     [F,S,P] = dlqr(sysd.A,sysd.B,Q,R); %F is gain, S is solution, P is eigenvalues of closedloop 
 %     F = place(sysd.A,sysd.B,eig(sysd.A) - 0.06);
-    
+
     % ---- Calculate target: ----
     % define performance equation z = Ctilde*x + Dtilde*u
     Ctilde = sysd.C;
     Dtilde = sysd.D;
-    
     %Calculate target selection:
     T = linsolve([[eye(5) - sysd.A, -sysd.B];
                   [Ctilde, zeros(2,2)]], ...
@@ -56,7 +55,7 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
                    r]);
     xref = T(1:5,:);
     uref = T(6:7,:);
-    
+
     %% ==== Simulation: ====
     
     if makeSimulation
