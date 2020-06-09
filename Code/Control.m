@@ -103,7 +103,7 @@ if controller_hinf
     % ---- Plots: ----
     title(ax11,'Output Heater 1')
     stairs(ax11,tdata,y(:,1), 'DisplayName', 'Hinf')
-    yline(ax11,rs(1),'--')
+    yline(ax11,rs(1),'--','DisplayName','r(1)')
     ylim(ax11,[-1 101])
     xlabel(ax11,"Time in [s]")
     ylabel(ax11,"Sensor 1 tempererature in [C]")
@@ -112,7 +112,7 @@ if controller_hinf
     title(ax12,'output Heater 2')
     stairs(ax12,tdata,y(:,2), 'DisplayName', 'Hinf')
     ylim(ax12,[-1 101])
-    yline(ax12,rs(2),'--')
+    yline(ax12,rs(2),'--','DisplayName','r(2)')
     xlabel(ax12,"Time in [s]")
     ylabel(ax12,"Sensor 1 tempererature in [C]")
     legend(ax12, 'Location', 'northeast')            
