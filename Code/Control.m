@@ -42,8 +42,8 @@ G = n4sid;
 %G = fdsid;
 
 % ---- Choose controller: ----
-controller_hinf = 1;
-controller_lqr = 0;
+controller_hinf = 0;
+controller_lqr = 1;
 
 %% ==== CHECK PLANT PROPERTIES: ====
 
