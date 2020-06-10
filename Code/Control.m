@@ -42,8 +42,8 @@ G = n4sid;
 %G = fdsid;
 
 % ---- Choose controller: ----
-controller_hinf = 0;
-controller_lqr = 1;
+controller_hinf = 1;
+controller_lqr = 0;
 
 %% ==== CHECK PLANT PROPERTIES: ====
 
@@ -57,7 +57,7 @@ disp(string(Nr_unobservable_states) + ' unobservable states.');
 
 
 %% ==== SETTINGS: ==== 
-    rs = [45;38];
+    rs = [50;40];
 
 %% ==== LQR: ====
 if controller_lqr
@@ -74,7 +74,7 @@ if controller_hinf
     [K_Hinf, K_Musyn] = Hinf(G);
     
         % ---- Simulate system: ----
-    T = 500;  % s
+    T = 600;  % s
     Gd = c2d(G,1,'zoh');
     
     T0 = G.UserData;
@@ -104,14 +104,14 @@ if controller_hinf
     title(ax11,'Output Heater 1')
     stairs(ax11,tdata,y(:,1), 'DisplayName', 'Hinf')
     yline(ax11,rs(1),'--','DisplayName','r(1)')
-    ylim(ax11,[-1 101])
+    ylim(ax11,[-1 60])
     xlabel(ax11,"Time in [s]")
     ylabel(ax11,"Sensor 1 tempererature in [C]")
     legend(ax11, 'Location', 'northeast')
 
     title(ax12,'output Heater 2')
     stairs(ax12,tdata,y(:,2), 'DisplayName', 'Hinf')
-    ylim(ax12,[-1 101])
+    ylim(ax12,[-1 60])
     yline(ax12,rs(2),'--','DisplayName','r(2)')
     xlabel(ax12,"Time in [s]")
     ylabel(ax12,"Sensor 1 tempererature in [C]")
