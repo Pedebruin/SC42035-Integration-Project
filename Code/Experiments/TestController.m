@@ -57,14 +57,14 @@ end
 
 % ---- Signal shaping ----
 TypeSignal       = 'step'; %Options: step, prbs
-InitialRestTime  = 1;%min
+InitialRestTime  = 0;%min
 PeriodSignal     = 5;%min
-Multiplier       = 1;
+Multiplier       = 3;
 
 switch TypeSignal
     case 'step'
-        H1Ref = [ 50, 40]; %reference signal without multiplier.
-        H2Ref = [ 40, 50]; %reference signal without multiplier.
+        H1Ref = [ 50, 30]; %reference signal without multiplier.
+        H2Ref = [ 40, 40]; %reference signal without multiplier.
         
         if length(H1Ref) ~= length(H2Ref)
             error('Signal arrays H1Signal and H2Signal are not of same length.');
@@ -111,6 +111,8 @@ DoTest = input('Test good to go. Continue? (y/n) : ','s');
 
 if DoTest == 'y'
     
+    oldPeriod = 0; %memory variable to compare current period with previous one.
+    
     figure(1) %figure to see experiment running.
         
     for i = 1:LengthTest
@@ -122,6 +124,9 @@ if DoTest == 'y'
         t1 = T1C();
         t2 = T2C();
         y_k0 = [t1;t2];
+        if max(t1,t2) > 60.0%degC
+            error('60degC exceeded. Cancelling experiment.')
+        end
         
         
         % ---- Check what reference to follow from list: ----
@@ -140,16 +145,13 @@ if DoTest == 'y'
         switch TypeController
             case 'lqr'
                 % ---- Apply input: ----
-                if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
+                if i <= InitialRestTime*60 %for safety of observer, give time to adjust + temperature read.
                     u_k0 = [H1Initial;H2Initial];
-                elseif i == max(InitialRestTime*60,10)
-                    oldPeriod = 0;
-                    T0 = 0;%mean([H1Output(1:i),H2Output(1:i)]); Don't need this!!!
                 else
                     %Calculate Target:
                     if oldPeriod ~= currentPeriod
                         oldPeriod = currentPeriod;
-                        [~,~,xref,uref] = LQRd(sys,[H1Ref(oldPeriod);H2Ref(oldPeriod)]-T0); %calculate target.
+                        [~,~,xref,uref] = LQRd(sys,[H1Ref(oldPeriod);H2Ref(oldPeriod)]); %calculate target.
                     end
 
                     % ---- Feedback: ----
@@ -170,13 +172,10 @@ if DoTest == 'y'
 
             case 'hinf'
                 % do same stuff as above
-                if i < max(InitialRestTime*60,10) %for safety of observer, give time to adjust + temperature read.
+                if i <= InitialRestTime*60 %for safety of observer, give time to adjust + temperature read.
                     u_k0 = [H1Initial;H2Initial];
                     r = [H1Initial;H2Initial];
                     yHinf_k0 = [0;0];
-                elseif i == max(InitialRestTime*60,10)
-                    oldPeriod = 0;
-                    T0 = mean([H1Output(1:i),H2Output(1:i)]); 
                 else 
                     if oldPeriod ~= currentPeriod
                         oldPeriod = currentPeriod;
@@ -253,6 +252,7 @@ if DoTest == 'y'
         plot(time(1:i),H2RefInput(1:i),'c-','LineWidth',1,'DisplayName','Reference 2');
         ylabel('Temperature in [C]','Interpreter','latex');
         xlabel('Time in [s]','Interpreter','latex');
+        ylim([0 60]);
         legend('Location','SouthEast');
         
         subplot(2,1,2);
