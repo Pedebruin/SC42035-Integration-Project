@@ -91,43 +91,38 @@ if controller_hinf
     % ---- Figure setup: ----
     fig = figure('Name','Control'); 
     sgtitle('Method: Hinf', 'Interpreter','latex');
-    ax11 = subplot(2,2,1);
-    ax12 = subplot(2,2,2);
-    ax21 = subplot(2,2,3);
-    ax22 = subplot(2,2,4);
+    ax11 = subplot(2,1,1);
+    ax12 = subplot(2,1,2);
     hold(ax11, "on");
     hold(ax12, "on");
-    hold(ax21, "on");
-    hold(ax22, "on");
+ 
 
     % ---- Plots: ----
     title(ax11,'Output Heater 1')
-    stairs(ax11,tdata,y(:,1), 'DisplayName', 'Hinf')
-    yline(ax11,rs(1),'--','DisplayName','r(1)')
+    stairs(ax11,tdata,y(:,1),'r', 'DisplayName', 'Hinf')
+    yline(ax11,rs(1),'m-','DisplayName','r(1)')
     ylim(ax11,[-1 60])
     xlabel(ax11,"Time in [s]")
     ylabel(ax11,"Sensor 1 tempererature in [C]")
     legend(ax11, 'Location', 'northeast')
 
-    title(ax12,'output Heater 2')
-    stairs(ax12,tdata,y(:,2), 'DisplayName', 'Hinf')
-    ylim(ax12,[-1 60])
-    yline(ax12,rs(2),'--','DisplayName','r(2)')
+    title(ax11,'output Heater 2')
+    stairs(ax11,tdata,y(:,2),'b', 'DisplayName', 'Hinf')
+    ylim(ax11,[-1 60])
+    yline(ax11,rs(2),'c-','DisplayName','r(2)')
+    xlabel(ax11,"Time in [s]")
+    ylabel(ax11,"Sensor 1 tempererature in [C]")
+
+    title(ax12,"Input heater 1")
+    stairs(ax12,tdata,u(:,1),'r', 'DisplayName', 'Heater 1')
+    ylim(ax12,[-1 101])
     xlabel(ax12,"Time in [s]")
-    ylabel(ax12,"Sensor 1 tempererature in [C]")
-    legend(ax12, 'Location', 'northeast')            
+    ylabel(ax12,"Input heater 1 in [\%]")
+    legend(ax12)
 
-    title(ax21,"Input heater 1")
-    stairs(ax21,tdata,u(:,1), 'DisplayName', 'Heater 1')
-    ylim(ax21,[-1 101])
-    xlabel(ax21,"Time in [s]")
-    ylabel(ax21,"Input heater 1 in [\%]")
-    legend(ax21)
-
-    title(ax22,"Input heater 2")
-    stairs(ax22,tdata,u(:,2), 'DisplayName', 'Heater 2')
-    ylim(ax22,[-1 101])
-    xlabel(ax22,"Time in [s]")
-    ylabel(ax22,"Input heater 2 in [\%]")
-    legend(ax22)
+    title(ax12,"Input heater 2")
+    stairs(ax12,tdata,u(:,2),'b', 'DisplayName', 'Heater 2')
+    ylim(ax12,[-1 101])
+    xlabel(ax12,"Time in [s]")
+    ylabel(ax12,"Input heater 2 in [\%]")
 end
