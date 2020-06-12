@@ -19,5 +19,4 @@ plot(ax2, Experiment.idd.u(:,1), 'r-','LineWidth',2,'DisplayName', 'Input 1');
 plot(ax2, Experiment.idd.u(:,2), 'b--','LineWidth',2,'DisplayName', 'Input 2');
 xlabel(ax2,'Time in [s]','Interpreter','latex');
 ylabel(ax2,'Applied input in [\%]','Interpreter','latex');
-%ylim(ax2, [0 100]);
 legend(ax2,'Location','NorthEast');

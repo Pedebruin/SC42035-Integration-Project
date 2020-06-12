@@ -18,6 +18,7 @@ plot(ax1, Test.idd.u(:,3), 'm-','LineWidth',1,'DisplayName', 'Reference 1');
 plot(ax1, Test.idd.u(:,4), 'c-','LineWidth',1,'DisplayName', 'Reference 2');
 xlabel(ax1,'Time in [s]','Interpreter','latex');
 ylabel(ax1,'Tempererature in [C]','Interpreter','latex');
+ylim(ax1, [0 60]);
 legend(ax1,'Location','SouthEast');
 
 title(ax2,'Inputs','Interpreter','latex');
