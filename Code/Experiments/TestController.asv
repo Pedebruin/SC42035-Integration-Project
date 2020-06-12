@@ -60,14 +60,14 @@ end
 
 % ---- Signal shaping ----
 TypeSignal       = 'step'; %Options: step, prbs
-InitialRestTime  = 1;%min
-PeriodSignal     = 10;%min
-Multiplier       = 1;
+InitialRestTime  = 0;%min
+PeriodSignal     = 5;%min
+Multiplier       = 3;
 
 switch TypeSignal
     case 'step'
-        H1Ref = [ 50]; %reference signal without multiplier.
-        H2Ref = [ 40]; %reference signal without multiplier.
+        H1Ref = [ 50, 30]; %reference signal without multiplier.
+        H2Ref = [ 40, 40]; %reference signal without multiplier.
         
         if length(H1Ref) ~= length(H2Ref)
             error('Signal arrays H1Signal and H2Signal are not of same length.');
@@ -188,22 +188,19 @@ if DoTest == 'y'
                     % ---- Feedback: ----
                     u_k0 = yHinf_k0;
                     u_k0 = min(100, max(0, u_k0)); %Input saturation.
-                   
+                    
+                    % ---- Observer: ----
+                    yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
+                    xhat_k1 = sysd.A*xhat_k0 + sysd.B*u_k0 + L*(y_k0 - yhat_k0);
+                    
                     % ---- Hinf state space: ----
                     xHinf_k1 = K_Hinf.A*xHinf_k0 + K_Hinf.B*(r - yhat_k0); % Simulate the dynamic controller, can also use yhat_k0
                     yHinf_k0 = K_Hinf.C*xHinf_k0 + K_Hinf.D*(r - yhat_k0); 
                     
-                    %Prepare next iteration:
+                    % ---- Prepare next iteration: ----
+                    xhat_k0 = xhat_k1;
                     xHinf_k0 = xHinf_k1;
                 end
-                
-                % ---- Observer: ----
-                yhat_k0 = sysd.C*xhat_k0 + sysd.D*u_k0;
-                xhat_k1 = sysd.A*xhat_k0 + sysd.B*u_k0 + L*(y_k0 - yhat_k0);
-                
-                %Prepare next iteration:
-                xhat_k0 = xhat_k1;
-                
                 % ---- Apply input: ----
                 h1(u_k0(1));
                 h2(u_k0(2));
