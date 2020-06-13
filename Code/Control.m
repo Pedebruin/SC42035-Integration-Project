@@ -33,13 +33,18 @@ n4sid = pade(ss(sys_n4sid),1); %Use pade approximation to convert ct ss with del
 fdsid = pade(minreal(ss(d2c(sys_FDSID))));
 % still need to linearise the greybox model! 
 
-% .... pole zero maps: ....
-% pzmap(n4sid)
-% pzmap(fdsid)
-
 % ---- Choose plant to use: ----
 G = n4sid;
 %G = fdsid;
+
+% .... Pole zero plots: ....
+makePZmap = 0;
+if makePZmap
+    figure(2);
+    %pzmap(G);          %continuous pzmap.
+    pzmap(c2d(G,1));   %discrete pzmap.
+    axis equal;
+end
 
 % ---- Choose controller: ----
 controller_hinf = 0;
