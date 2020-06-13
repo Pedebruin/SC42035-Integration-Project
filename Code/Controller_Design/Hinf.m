@@ -5,7 +5,7 @@ function [K_Hinf, K_Musyn] = Hinf(G)
 % ---- Set up generalised plant: ----
     
     % Wp
-    W_p = makeweight(1e5, [5e-3*(2*pi) db2mag(3)], 1); % Design it upside down!
+    W_p = makeweight(1e5, [35e-4*(2*pi) db2mag(3)], 1); % Design it upside down!
     Wp = [W_p 0; 0 W_p];            % ideal sensitivity function S   
     
     % Wt
