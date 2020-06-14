@@ -40,7 +40,7 @@ function [L,F,xref,uref] = LQRd(Plant,r,varargin)
     
     % ---- calculate optimum F (using discrete LQR): ----
     Q = diag([1,1,1,0,0]);%eye(length(sysd.A));
-    R = eye(size(sysd.B,2))*0;
+    R = eye(size(sysd.B,2))*10^-6;
     [F,S,P] = dlqr(sysd.A,sysd.B,Q,R); %F is gain, S is solution, P is eigenvalues of closedloop 
 %     F = place(sysd.A,sysd.B,eig(sysd.A) - 0.06);
 
