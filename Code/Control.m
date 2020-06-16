@@ -10,7 +10,6 @@ Written by:
 For the course:
     SC42035 Integration Project Systems and Control (2019/20 Q4)
 %}
-%% ==== SETTINGS: ====
 
 %% ==== SETUP: ====
 % ---- Accessing folders: ----
@@ -29,10 +28,11 @@ load(fdsid_file.name)
 load(GreyBox_file.name)
 
 % ---- Get workable models: ----
-n4sid = pade(ss(sys_n4sid),1); %Use pade approximation to convert ct ss with delay to ct ss without delay by adding more states.
+n4sid = pade(ss(sys_n4sid),1); 
 fdsid = pade(minreal(ss(d2c(sys_FDSID))));
-% still need to linearise the greybox model! 
 
+
+%% ==== settings: ====
 % ---- Choose plant to use: ----
 G = n4sid;
 %G = fdsid;
@@ -41,8 +41,8 @@ G = n4sid;
 makePZmap = 0;
 if makePZmap
     figure(2);
-    %pzmap(G);          %continuous pzmap.
-    pzmap(c2d(G,1));   %discrete pzmap.
+    %pzmap(G);              % continuous pzmap.
+    pzmap(c2d(G,1));        % discrete pzmap.
     axis equal;
 end
 
@@ -66,16 +66,12 @@ disp(string(Nr_unobservable_states) + ' unobservable states.');
 
 %% ==== LQR: ====
 if controller_lqr
-    r = [50;40];
     Plant = G;
-    LQRd(Plant,r,'makeSimulation',true);
+    LQRd(Plant,rs,'makeSimulation',true);
 end
 
 %% ==== HINF: ====
 if controller_hinf
-    % Can still use the continuous time system. The command used is
-    % sdhinfsyn, which samples the system itself. So the controller is
-    % still a discrete time controller K. 
     [K_Hinf, K_Musyn] = Hinf(G);
     
         % ---- Simulate system: ----

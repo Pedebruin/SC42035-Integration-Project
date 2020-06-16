@@ -171,7 +171,7 @@ if Validation
 
     
     % Filtering
-    %idd_v.y = lowpass(idd_v.y,5e-3,1);
+    % idd_v.y = lowpass(idd_v.y,5e-3,1);
 
 
 
