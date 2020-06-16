@@ -1,5 +1,5 @@
 %load a file. Then run this script to create plot:
-
+disp('Test date: ' + string(Test.Date));
 
 
 fig = figure(1);
