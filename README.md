@@ -7,14 +7,13 @@ Marco Delgado Gosalvez  4268083
 
 This README is structured in the following main topics:
 * [Content](##content)
-  * General directories
-  * Code files
-* Run Instructions
-* Dependancies
-* Acknowledgements
+  * [General directories](###general-directories)
+  * [Code files](###code-files)
+* [Run Instructions](##run-instructions)
+* [Dependancies](##dependancies)
 ---
 ## Content
-### General-directories
+### General directories
 * Code  
   This directory contains all the code that was written for the project. 
 * Project  
@@ -28,7 +27,7 @@ This directory contains all the figures and presentables related to the report. 
 This repository can be found on our [GITHUB](https://github.com/Pedebruin/SC42035-Integration-Project) repository. 
   * Figures  
     This folder contains the figures used in the report. 
-### Code-files
+### Code files
 Within the code directory, the code is devised into the following structure:
 * Code
   * `Control.m`  
