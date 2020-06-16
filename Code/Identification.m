@@ -18,7 +18,7 @@ addpath('System_Identification/Models')
 addpath('Functions')
 
 % ---- Settings: ----
-identification = 0;         % Identify models?
+identification = 1;         % Identify models?
 Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
     makeFDSID   = 0;        % Use FDSID?
