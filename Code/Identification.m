@@ -15,10 +15,10 @@ For the course:
 % ---- Accessing folders: ----
 addpath('System_Identification')
 addpath('System_Identification/Models')
-addpath('Functions')
+addpath('System_Identification/Functions')
 
 % ---- Settings: ----
-identification = 1;         % Identify models?
+identification = 0;         % Identify models?
 Validation = 1;             % Validate models?
     maken4sid   = 1;        % Use N4SID?
     makeFDSID   = 0;        % Use FDSID?
