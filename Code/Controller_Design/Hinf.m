@@ -16,13 +16,12 @@ function [K_Hinf, K_Musyn] = Hinf(G)
     P = augw(G,Wp,[],Wt);
     
     [K_Hinf,~,~] = mixsyn(G, Wp, [], Wt); %Wp, Wu, Wt
-    % [K_musyn,~] = musyn(P,2,2); % Still not working..
     
     CL = feedback(G*K_Hinf,tf(eye(2)));
     Sens = feedback(tf(eye(2)),G*K_Hinf);
     
     K_Hinf = c2d(K_Hinf,1,'zoh');
-    K_Musyn = tf(eye(2));
+    K_Musyn = tf(eye(2)); % not implemented..
     
     
    
