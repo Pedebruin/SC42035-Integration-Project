@@ -15,7 +15,7 @@ For the course:
 % ---- Accessing folders: ----
 addpath('System_Identification')
 addpath('System_Identification/Models')
-addpath('Functions')
+addpath('System_Identification/Functions')
 
 % ---- Settings: ----
 identification = 0;         % Identify models?
